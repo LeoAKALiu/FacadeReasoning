@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 import type { ParameterMapping } from '@/data/types'
 import { ReliabilityDot } from '@/components/overview/ReliabilityDot'
+import { ParameterImportanceBadge } from '@/components/shared/ParameterImportanceBadge'
 
 interface ParameterMappingRowProps {
   mapping: ParameterMapping
@@ -54,9 +55,17 @@ export function ParameterMappingRow({
       <div className="flex-1 min-w-0 text-right">
         <p className="text-2xs text-ink-tertiary mb-0.5 uppercase tracking-wider">设计参数</p>
         <p className="text-sm font-medium text-ink-primary truncate">{mapping.designParam.label}</p>
-        <span className="inline-block bg-infer-subtle border border-infer-muted text-infer text-2xs px-1.5 py-0.5 rounded mt-0.5">
-          {mapping.designParam.category}
-        </span>
+        <div className="flex items-center justify-end gap-1.5 flex-wrap mt-0.5">
+          <span className="inline-block bg-infer-subtle border border-infer-muted text-infer text-2xs px-1.5 py-0.5 rounded">
+            {mapping.designParam.category}
+          </span>
+          <ParameterImportanceBadge level={mapping.importanceLevel} />
+        </div>
+        {mapping.futureUseNote && (
+          <p className="text-2xs text-ink-tertiary mt-1 max-w-[220px] ml-auto leading-relaxed">
+            {mapping.futureUseNote}
+          </p>
+        )}
       </div>
 
       {/* Expand indicator */}

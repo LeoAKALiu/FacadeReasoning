@@ -7,6 +7,7 @@ import { getCaseById } from '@/data/index'
 import { ParameterMappingRow } from '@/components/mapping/ParameterMappingRow'
 import { EvidenceBasisDrawer } from '@/components/mapping/EvidenceBasisDrawer'
 import { ReliabilityDot } from '@/components/overview/ReliabilityDot'
+import { EngineeringTranslationFlow } from '@/components/shared/EngineeringTranslationFlow'
 import type { ParameterMapping } from '@/data/types'
 
 /**
@@ -42,6 +43,27 @@ export default function MappingPage() {
     {} as Record<string, ParameterMapping[]>,
   )
 
+  const importanceOrder = {
+    critical: 0,
+    important: 1,
+    detail: 2,
+  } as const
+
+  const sortedCategoryGroups = Object.fromEntries(
+    Object.entries(categoryGroups).map(([cat, mappings]) => [
+      cat,
+      [...mappings].sort((a, b) => {
+        const aRank = a.importanceLevel ? importanceOrder[a.importanceLevel] : 99
+        const bRank = b.importanceLevel ? importanceOrder[b.importanceLevel] : 99
+        return aRank - bRank
+      }),
+    ]),
+  )
+
+  const criticalCount = facadeCase.parameterMappings.filter(
+    (mapping) => mapping.importanceLevel === 'critical',
+  ).length
+
   return (
     <div>
       {/* Header */}
@@ -51,6 +73,9 @@ export default function MappingPage() {
           <p className="text-sm text-ink-secondary">
             将从图像中提取的有效参数，按语义关系映射至建筑设计参数体系。
             点击任意映射行查看完整依据链。
+          </p>
+          <p className="text-xs text-ink-tertiary mt-2">
+            这些设计参数将进一步用于标准层组织、轴网候选与结构表达生成。
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -64,10 +89,11 @@ export default function MappingPage() {
       </div>
 
       {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
           { label: '映射总数', value: String(facadeCase.parameterMappings.length) },
           { label: '设计参数类别', value: String(Object.keys(categoryGroups).length) },
+          { label: '核心约束参数', value: String(criticalCount) },
           {
             label: '平均映射置信度',
             value: <ReliabilityDot value={avgConfidence} variant="pill" />,
@@ -82,7 +108,7 @@ export default function MappingPage() {
 
       {/* Mapping list — grouped by design param category */}
       <div className="space-y-6">
-        {Object.entries(categoryGroups).map(([cat, mappings]) => (
+        {Object.entries(sortedCategoryGroups).map(([cat, mappings]) => (
           <div key={cat}>
             <div className="flex items-center gap-2 mb-3">
               <h2 className="label-xs">{cat}</h2>
@@ -103,6 +129,10 @@ export default function MappingPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-6">
+        <EngineeringTranslationFlow bridgeNote="当前映射结果不会停留在参数层，下一步将继续转译为标准层组织、轴网候选与结构表达草图。" />
       </div>
 
       {/* Mapping legend callout */}

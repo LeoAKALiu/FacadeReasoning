@@ -1,6 +1,6 @@
 'use client'
 
-import { cn, getSourceColors, getSourceLabel, reliabilityToColor, formatReliability } from '@/lib/utils'
+import { cn, getImportanceMeta, getRecommendedUsageMeta, getSourceLabel, reliabilityToColor, formatReliability } from '@/lib/utils'
 import type { FacadeCase } from '@/data/types'
 
 interface ReportCanvasProps {
@@ -25,7 +25,7 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
       style={{
         width: '794px',
         minHeight: '1123px',
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: 'system-ui, sans-serif',
       }}
     >
       {/* Header band */}
@@ -65,6 +65,42 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
           <p className="text-sm text-gray-700 leading-relaxed">{facadeCase.summary}</p>
         </section>
 
+        {facadeCase.overview.recommendedUsage && (
+          <section className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-medium">当前使用建议</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {getRecommendedUsageMeta(facadeCase.overview.recommendedUsage).label}
+                </p>
+                <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                  {facadeCase.overview.usageReason}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  'rounded-full px-3 py-1 text-xs font-medium',
+                  getRecommendedUsageMeta(facadeCase.overview.recommendedUsage).classes
+                    .replaceAll('bg-observe-subtle', 'bg-green-50')
+                    .replaceAll('text-observe', 'text-green-700')
+                    .replaceAll('border-observe-muted', 'border-green-200')
+                    .replaceAll('bg-infer-subtle', 'bg-blue-50')
+                    .replaceAll('text-infer', 'text-blue-700')
+                    .replaceAll('border-infer-muted', 'border-blue-200')
+                    .replaceAll('bg-ai-subtle', 'bg-purple-50')
+                    .replaceAll('text-ai', 'text-purple-700')
+                    .replaceAll('border-ai-muted', 'border-purple-200')
+                    .replaceAll('bg-review-subtle', 'bg-amber-50')
+                    .replaceAll('text-review', 'text-amber-700')
+                    .replaceAll('border-review-muted', 'border-amber-200'),
+                )}
+              >
+                {getRecommendedUsageMeta(facadeCase.overview.recommendedUsage).label}
+              </span>
+            </div>
+          </section>
+        )}
+
         {/* Legend */}
         <section className="flex items-center gap-6 flex-wrap">
           {(
@@ -75,7 +111,6 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
               ['pending_review', '待复核'],
             ] as const
           ).map(([source, label]) => {
-            const colors = getSourceColors(source)
             return (
               <div key={source} className="flex items-center gap-1.5 text-xs">
                 <div
@@ -111,6 +146,7 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
                 <th className="text-left px-3 py-2 font-medium border border-gray-200">分类</th>
                 <th className="text-left px-3 py-2 font-medium border border-gray-200">参数名称</th>
                 <th className="text-left px-3 py-2 font-medium border border-gray-200">值</th>
+                <th className="text-center px-3 py-2 font-medium border border-gray-200">重要性</th>
                 <th className="text-center px-3 py-2 font-medium border border-gray-200">来源</th>
                 <th className="text-center px-3 py-2 font-medium border border-gray-200">可靠度</th>
               </tr>
@@ -129,6 +165,27 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
                     <td className="px-3 py-2 text-gray-800 border border-gray-200">{p.label}</td>
                     <td className="px-3 py-2 font-mono text-gray-900 font-medium border border-gray-200">
                       {p.value}{p.unit ? ` ${p.unit}` : ''}
+                    </td>
+                    <td className="px-3 py-2 text-center border border-gray-200">
+                      {p.importanceLevel && (
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-medium',
+                            getImportanceMeta(p.importanceLevel).classes
+                              .replaceAll('bg-red-950/50', 'bg-red-50')
+                              .replaceAll('text-red-300', 'text-red-700')
+                              .replaceAll('border-red-900/70', 'border-red-200')
+                              .replaceAll('bg-blue-950/50', 'bg-blue-50')
+                              .replaceAll('text-blue-300', 'text-blue-700')
+                              .replaceAll('border-blue-900/70', 'border-blue-200')
+                              .replaceAll('bg-slate-800/80', 'bg-slate-100')
+                              .replaceAll('text-slate-300', 'text-slate-700')
+                              .replaceAll('border-slate-700', 'border-slate-200'),
+                          )}
+                        >
+                          {getImportanceMeta(p.importanceLevel).label}
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-center border border-gray-200">
                       <span
@@ -150,6 +207,62 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
             </tbody>
           </table>
         </section>
+
+        {facadeCase.overview.futureOutputs && (
+          <section className="space-y-4">
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2 font-medium">
+                未来成果物预览
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-gray-900 mb-2">
+                    {facadeCase.overview.futureOutputs.structuralSketchPreview.title}
+                  </p>
+                  <svg viewBox="0 0 260 150" className="w-full h-auto mb-3">
+                    <rect x="18" y="16" width="224" height="112" rx="6" fill="none" stroke="#94A3B8" strokeWidth="1.5" />
+                    <rect x="44" y="36" width="172" height="70" rx="4" fill="none" stroke="#6366F1" strokeDasharray="4 3" />
+                    <line x1="76" y1="36" x2="76" y2="106" stroke="#94A3B8" />
+                    <line x1="116" y1="36" x2="116" y2="106" stroke="#94A3B8" />
+                    <line x1="156" y1="36" x2="156" y2="106" stroke="#94A3B8" />
+                    <line x1="196" y1="36" x2="196" y2="106" stroke="#94A3B8" />
+                    <line x1="44" y1="60" x2="216" y2="60" stroke="#CBD5E1" />
+                    <line x1="44" y1="84" x2="216" y2="84" stroke="#CBD5E1" />
+                    {[76, 116, 156, 196].map((x) => (
+                      <circle key={x} cx={x} cy={60} r="3.5" fill="#22C55E" />
+                    ))}
+                    {[76, 116, 156, 196].map((x) => (
+                      <circle key={`${x}-2`} cx={x} cy={84} r="3.5" fill="#22C55E" />
+                    ))}
+                  </svg>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    {facadeCase.overview.futureOutputs.structuralSketchPreview.summary}
+                  </p>
+                </div>
+
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-gray-900 mb-2">结构参数表与构件候选</p>
+                  <div className="space-y-2 mb-3">
+                    {facadeCase.overview.futureOutputs.structuralParameterTable.slice(0, 4).map((row) => (
+                      <div key={row.label} className="flex items-center justify-between text-xs border-b border-gray-100 pb-1">
+                        <span className="text-gray-600">{row.label}</span>
+                        <span className="font-mono text-gray-900">{row.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    {facadeCase.overview.futureOutputs.componentCandidates.slice(0, 2).map((item) => (
+                      <div key={item.label}>
+                        <p className="text-xs font-medium text-gray-800">{item.label}</p>
+                        <p className="text-xs text-gray-600 mt-0.5">{item.candidates.join(' / ')}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Review items */}
         {facadeCase.reviewItems.length > 0 && (
@@ -176,6 +289,36 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
                     >
                       {item.priority === 'high' ? '高' : item.priority === 'medium' ? '中' : '低'}优先
                     </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {facadeCase.overview.evolution && (
+          <section>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-medium">
+              系统演进路径
+            </p>
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              {[
+                facadeCase.overview.evolution.currentStage,
+                facadeCase.overview.evolution.nextStage,
+                facadeCase.overview.evolution.targetStage,
+              ].map((stage, index) => (
+                <div key={stage.title} className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-5 h-5 rounded bg-indigo-50 text-indigo-700 text-xs font-bold flex items-center justify-center">
+                      {index + 1}
+                    </span>
+                    <p className="font-medium text-gray-900">{stage.title}</p>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed mb-2">{stage.description}</p>
+                  <div className="space-y-1">
+                    {stage.bullets.map((bullet) => (
+                      <p key={bullet} className="text-xs text-gray-500">• {bullet}</p>
+                    ))}
                   </div>
                 </div>
               ))}

@@ -7,7 +7,7 @@ import { getCaseById } from '@/data/index'
 import { ImageViewer } from '@/components/evidence/ImageViewer'
 import { EvidenceCard } from '@/components/evidence/EvidenceCard'
 import { SourceBadge } from '@/components/evidence/SourceBadge'
-import type { EvidenceSource } from '@/data/types'
+import type { EvidenceSource, Evidence } from '@/data/types'
 
 const SOURCE_FILTERS: { source: EvidenceSource | 'all'; label: string }[] = [
   { source: 'all', label: '全部' },
@@ -17,8 +17,26 @@ const SOURCE_FILTERS: { source: EvidenceSource | 'all'; label: string }[] = [
   { source: 'pending_review', label: '待复核' },
 ]
 
+function getPageConclusion(evidence: Evidence[]): string {
+  const total = evidence.length
+  if (total === 0) return '当前无证据数据。'
+  const obs = evidence.filter((e) => e.source === 'direct_observation').length
+  const ai = evidence.filter((e) => e.source === 'ai_completion').length
+  const review = evidence.filter((e) => e.source === 'pending_review').length
+  if (obs / total >= 0.65 && review === 0) {
+    return '当前案例以直接观测证据为主，整体证据基础较强。'
+  }
+  if (ai > 0 || review > 0) {
+    if (review >= 2 || ai >= 3) {
+      return '当前案例存在少量 AI 补全与待复核项，建议结合人工复核。'
+    }
+    return '当前案例证据结构较均衡，可支撑后续参数映射与方案推理。'
+  }
+  return '当前案例证据结构较均衡，可支撑后续参数映射与方案推理。'
+}
+
 /**
- * Evidence extraction page — image viewer (3 modes) + evidence card list.
+ * Evidence extraction page — image viewer + evidence cards with image linkage.
  */
 export default function EvidencePage() {
   const params = useParams()
@@ -27,6 +45,8 @@ export default function EvidencePage() {
 
   const [selectedFilter, setSelectedFilter] = useState<EvidenceSource | 'all'>('all')
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
+  const [hoveredEvidenceId, setHoveredEvidenceId] = useState<string | null>(null)
+  const highlightedEvidenceId = selectedEvidenceId ?? hoveredEvidenceId
 
   if (!facadeCase) {
     return (
@@ -52,10 +72,11 @@ export default function EvidencePage() {
     {} as Record<string, number>,
   )
 
+  const pageConclusion = getPageConclusion(facadeCase.evidence)
+
   return (
     <div>
-      {/* Page header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h1 className="text-xl font-bold text-ink-primary mb-1">有效参数证据提取</h1>
           <p className="text-sm text-ink-secondary">
@@ -70,8 +91,7 @@ export default function EvidencePage() {
         </Link>
       </div>
 
-      {/* Source summary chips */}
-      <div className="flex items-center gap-2 flex-wrap mb-6">
+      <div className="flex items-center gap-2 flex-wrap mb-2">
         {Object.entries(sourceCounts).map(([source, count]) => (
           <div key={source} className="flex items-center gap-1">
             <SourceBadge source={source as EvidenceSource} variant="inline" />
@@ -83,13 +103,16 @@ export default function EvidencePage() {
         </span>
       </div>
 
-      {/* Main two-column layout */}
+      <p className="text-sm text-ink-secondary mb-6 pl-0.5 border-l-2 border-accent/50 py-1 px-3">
+        {pageConclusion}
+      </p>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Image viewer */}
         <div>
           <ImageViewer
             images={facadeCase.images}
             evidenceItems={facadeCase.evidence}
+            highlightedEvidenceId={highlightedEvidenceId}
           />
 
           {/* Case info card */}
@@ -159,6 +182,7 @@ export default function EvidencePage() {
                 onSelect={(id) =>
                   setSelectedEvidenceId(selectedEvidenceId === id ? null : id)
                 }
+                onHover={setHoveredEvidenceId}
               />
             ))}
           </div>

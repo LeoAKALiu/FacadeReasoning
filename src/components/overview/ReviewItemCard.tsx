@@ -28,6 +28,12 @@ export function ReviewItemCard({ item, index }: ReviewItemCardProps) {
         </span>
       </div>
 
+      {item.blocksUsage && (
+        <div className="rounded-md border border-review-muted bg-review-subtle px-2.5 py-2 text-xs text-review">
+          该项会直接影响“当前结果是否可进入正式工程表达”。
+        </div>
+      )}
+
       {/* Current value */}
       <div className="flex items-center gap-2">
         <span className="text-2xs text-ink-tertiary uppercase tracking-wider shrink-0">当前值</span>
@@ -52,6 +58,12 @@ export function ReviewItemCard({ item, index }: ReviewItemCardProps) {
           <p className="text-xs text-observe leading-relaxed">{item.suggestion}</p>
         </div>
       </div>
+
+      {item.relatedParameterKeys && item.relatedParameterKeys.length > 0 && (
+        <div className="text-2xs text-ink-tertiary">
+          关联关键参数：{item.relatedParameterKeys.join(' / ')}
+        </div>
+      )}
     </div>
   )
 }

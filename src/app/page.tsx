@@ -1,19 +1,38 @@
 import Link from 'next/link'
 import { allCases } from '@/data/index'
 import { reliabilityToColor, formatReliability } from '@/lib/utils'
+import type { FacadeCase } from '@/data/types'
 
-/** Home page — product intro + 3 demo case cards + capability highlights. */
+const DEMO_VALUE: Record<string, string> = {
+  'case-01': '立面模数清晰，适合展示高可靠度推断。',
+  'case-02': '构件缺损明显，适合展示 AI 补全与人工复核。',
+  'case-03': '分格规则存在多解，适合展示候选方案差异。',
+}
+
+function getReliabilitySemantic(c: FacadeCase): string {
+  const total = c.evidence.length
+  if (total === 0) return '证据不足'
+  const obs = c.evidence.filter((e) => e.source === 'direct_observation').length
+  const ai = c.evidence.filter((e) => e.source === 'ai_completion').length
+  const review = c.evidence.filter((e) => e.source === 'pending_review').length
+  const rel = c.overview.overallReliability
+  if (rel >= 0.8 && obs / total >= 0.6) return '高可靠度：以直接观测为主'
+  if (c.reviewItems.length >= 2 && c.scenarios.length >= 2) return '中等可靠度：多方案分歧明显'
+  if (ai / total >= 0.2 || review / total >= 0.15) return '中等可靠度：AI 补全或待复核占比较高'
+  if (rel >= 0.75) return '较高可靠度：证据结构较均衡'
+  return '中等可靠度：建议结合人工复核'
+}
+
+/** Home page — product intro + flow band + legend + 3 demo case cards. */
 export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
       <section className="relative px-6 pt-20 pb-24 overflow-hidden">
-        {/* Background grid */}
         <div
           className="absolute inset-0 bg-grid-pattern bg-grid-sm opacity-40 pointer-events-none"
           aria-hidden
         />
-        {/* Gradient fade */}
         <div
           className="absolute inset-0 bg-gradient-to-b from-canvas via-canvas/80 to-canvas pointer-events-none"
           aria-hidden
@@ -32,67 +51,112 @@ export default function HomePage() {
           </h1>
 
           <p className="text-ink-secondary text-lg max-w-2xl mx-auto leading-relaxed mb-8">
-            Facade Reasoning Demo 将建筑外立面图像转化为有认识论依据的设计参数体系——
-            区分直接观测、规则推断、AI 补全与待复核项，提供带可靠度标识的结构化输出。
+            自动提取立面证据，推断设计参数，补全缺失信息，并输出带可靠度标识的结构结果。
+          </p>
+          <p className="text-xs text-ink-tertiary max-w-2xl mx-auto mb-8">
+            当前演示聚焦证据提取、参数映射与推理补全，未来将进一步生成带可靠度标识的结构表达结果。
           </p>
 
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/project/new" className="btn-primary px-6 py-2.5 text-base">
-              开始新项目
-            </Link>
-            <Link href={`/case-01/evidence`} className="btn-secondary px-6 py-2.5 text-base">
-              查看演示案例
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Capability summary */}
-      <section className="px-6 pb-16 max-w-5xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: '有效参数提取', icon: '⬛', desc: '从图像中提取可信视觉证据，标注区域依据' },
-            { label: '参数映射', icon: '⬛', desc: '有效参数 → 设计参数的可解释映射链' },
-            { label: '约束推理补全', icon: '⬛', desc: '规范约束 + AI 缺省值 三套候选方案' },
-            { label: '结构化输出', icon: '⬛', desc: '带可靠度的树形结构表达与待复核清单' },
-          ].map((cap) => (
-            <div key={cap.label} className="card p-4">
-              <div className="w-8 h-8 rounded-md bg-accent-subtle border border-accent-muted flex items-center justify-center mb-3">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="2" width="4" height="12" rx="1" fill="#6366F1" fillOpacity="0.8" />
-                  <rect x="8" y="4" width="6" height="4" rx="1" fill="#6366F1" fillOpacity="0.5" />
-                  <rect x="8" y="10" width="6" height="2" rx="1" fill="#6366F1" fillOpacity="0.3" />
-                </svg>
-              </div>
-              <h3 className="text-sm font-semibold text-ink-primary mb-1">{cap.label}</h3>
-              <p className="text-xs text-ink-tertiary leading-relaxed">{cap.desc}</p>
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center justify-center gap-4">
+              <Link href="/project/new" className="btn-primary px-6 py-2.5 text-base">
+                开始新项目
+              </Link>
+              <Link href="/case-01/evidence" className="btn-secondary px-6 py-2.5 text-base">
+                查看演示案例
+              </Link>
             </div>
-          ))}
+            <p className="text-xs text-ink-tertiary">
+              建议先查看演示案例，3 分钟看完整流程
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Status legend */}
-      <section className="px-6 pb-12 max-w-5xl mx-auto">
-        <div className="card p-5">
-          <h2 className="text-sm font-semibold text-ink-primary mb-4">参数来源状态说明</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {(
-              [
-                { color: '#22C55E', bg: 'bg-observe-subtle', border: 'border-observe-muted', label: '直接观测', desc: '从图像直接测量或识别，高置信度视觉证据' },
-                { color: '#3B82F6', bg: 'bg-infer-subtle', border: 'border-infer-muted', label: '规则推断', desc: '基于建筑规范、类型学规律或几何关系推导' },
-                { color: '#A855F7', bg: 'bg-ai-subtle', border: 'border-ai-muted', label: 'AI 补全', desc: '图像证据不足时，AI 基于训练知识的缺省填充' },
-                { color: '#F59E0B', bg: 'bg-review-subtle', border: 'border-review-muted', label: '待复核', desc: '置信度低或存在多解歧义，必须人工验证' },
-              ] as const
-            ).map((item) => (
-              <div key={item.label} className={`${item.bg} border ${item.border} rounded-lg p-3`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs font-semibold" style={{ color: item.color }}>{item.label}</span>
-                </div>
-                <p className="text-xs text-ink-tertiary leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+      {/* Flow band: 输入 → 推理 → 输出 */}
+      <section className="px-6 pb-16 max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-stretch gap-0 sm:gap-2">
+          {/* Step 1: 有效参数提取 */}
+          <div className="card p-4 flex-1 min-w-0">
+            <div className="w-8 h-8 rounded-md bg-accent-subtle border border-accent-muted flex items-center justify-center mb-3">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="2" width="4" height="12" rx="1" fill="currentColor" fillOpacity="0.8" />
+                <rect x="8" y="4" width="6" height="4" rx="1" fill="currentColor" fillOpacity="0.5" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold text-ink-primary mb-1">有效参数提取</h3>
+            <p className="text-xs text-ink-tertiary leading-relaxed">从图像提取视觉证据，标注区域依据</p>
           </div>
+          <div className="hidden sm:flex items-center shrink-0 text-ink-tertiary py-4">
+            <span className="text-lg">→</span>
+          </div>
+          {/* Step 2: 参数映射 */}
+          <div className="card p-4 flex-1 min-w-0">
+            <div className="w-8 h-8 rounded-md bg-accent-subtle border border-accent-muted flex items-center justify-center mb-3">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h4l2-4 2 8 2-4h1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold text-ink-primary mb-1">参数映射</h3>
+            <p className="text-xs text-ink-tertiary leading-relaxed">证据 → 设计参数的可解释映射链</p>
+          </div>
+          <div className="hidden sm:flex items-center shrink-0 text-ink-tertiary py-4">
+            <span className="text-lg">→</span>
+          </div>
+          {/* Step 3: 约束推理补全 — 加重 */}
+          <div className="card p-5 flex-1 min-w-0 border-accent/30 bg-surface-raised">
+            <div className="w-9 h-9 rounded-md bg-accent-subtle border border-accent-muted flex items-center justify-center mb-3">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M9 5v4l2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold text-ink-primary mb-1">约束推理补全</h3>
+            <p className="text-xs text-ink-tertiary leading-relaxed">规范约束 + AI 缺省值，生成多套候选方案，非单纯识图</p>
+          </div>
+          <div className="hidden sm:flex items-center shrink-0 text-ink-tertiary py-4">
+            <span className="text-lg">→</span>
+          </div>
+          {/* Step 4: 结构化输出 — 加重 */}
+          <div className="card p-5 flex-1 min-w-0 border-accent/30 bg-surface-raised">
+            <div className="w-9 h-9 rounded-md bg-accent-subtle border border-accent-muted flex items-center justify-center mb-3">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="2" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                <rect x="10" y="2" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                <rect x="2" y="10" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                <rect x="10" y="10" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.2" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold text-ink-primary mb-1">结构化输出</h3>
+            <p className="text-xs text-ink-tertiary leading-relaxed">带可靠度的树形结果与待复核清单，可追溯可解释</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Status legend — compact single line */}
+      <section className="px-6 pb-12 max-w-5xl mx-auto">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-tertiary border border-border rounded-lg px-4 py-2.5 bg-surface/50">
+          <span className="text-ink-secondary font-medium shrink-0">参数来源：</span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-observe" />
+            <span>直接观测</span>
+            <span className="opacity-75">图像直接测量或识别</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-infer" />
+            <span>规则推断</span>
+            <span className="opacity-75">规范/类型学推导</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-ai" />
+            <span>AI 补全</span>
+            <span className="opacity-75">证据不足时缺省填充</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-review" />
+            <span>待复核</span>
+            <span className="opacity-75">需人工验证</span>
+          </span>
         </div>
       </section>
 
@@ -110,6 +174,8 @@ export default function HomePage() {
             const overallColor = reliabilityToColor(c.overview.overallReliability)
             const pendingCount = c.reviewItems.length
             const highCount = c.reviewItems.filter((r) => r.priority === 'high').length
+            const demoValue = DEMO_VALUE[c.id] ?? c.summary
+            const reliabilitySemantic = getReliabilitySemantic(c)
 
             return (
               <Link
@@ -117,10 +183,8 @@ export default function HomePage() {
                 href={`/${c.id}/evidence`}
                 className="card group hover:border-accent transition-all hover:shadow-lg hover:shadow-accent/10 overflow-hidden"
               >
-                {/* Fake image area */}
                 <div className="h-44 bg-gradient-to-br from-surface-raised via-surface to-surface-overlay flex items-center justify-center relative overflow-hidden">
                   <FacadeThumbnail type={c.id} />
-                  {/* Overlay on hover */}
                   <div className="absolute inset-0 bg-accent/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="bg-accent text-white text-xs font-medium px-3 py-1.5 rounded-md">
                       进入推理流程 →
@@ -129,33 +193,28 @@ export default function HomePage() {
                 </div>
 
                 <div className="p-4 space-y-3">
-                  <div>
-                    <p className="text-xs text-ink-tertiary mb-0.5">{c.buildingType}</p>
-                    <h3 className="text-sm font-semibold text-ink-primary">{c.name}</h3>
-                    <p className="text-xs text-ink-tertiary mt-0.5">{c.location}</p>
-                  </div>
-
-                  <p className="text-xs text-ink-secondary leading-relaxed line-clamp-2">
-                    {c.summary}
+                  <h3 className="text-base font-semibold text-ink-primary leading-tight">{c.name}</h3>
+                  <p className="text-xs text-ink-tertiary">{c.buildingType}</p>
+                  <p className="text-xs text-ink-secondary leading-relaxed">
+                    {demoValue}
                   </p>
+                  <p className="text-2xs text-ink-tertiary">{c.location}</p>
 
                   <div className="divider" />
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="text-ink-tertiary">{c.evidence.length} 条证据</span>
-                      <span className="text-ink-tertiary">{c.parameterMappings.length} 个映射</span>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-3 text-xs text-ink-tertiary">
+                      <span>{c.evidence.length} 条证据</span>
+                      <span>{c.parameterMappings.length} 个映射</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-2xs text-ink-tertiary">综合可靠度</span>
-                      <span
-                        className="mono text-xs font-bold"
-                        style={{ color: overallColor }}
-                      >
+                      <span className="mono text-xs font-bold" style={{ color: overallColor }}>
                         {formatReliability(c.overview.overallReliability)}
                       </span>
+                      <span className="text-2xs text-ink-tertiary">综合可靠度</span>
                     </div>
                   </div>
+                  <p className="text-2xs text-ink-tertiary leading-snug">{reliabilitySemantic}</p>
 
                   {pendingCount > 0 && (
                     <div className="flex items-center gap-1.5 text-xs text-review bg-review-subtle border border-review-muted rounded px-2 py-1.5">

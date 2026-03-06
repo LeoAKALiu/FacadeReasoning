@@ -42,6 +42,7 @@ export default function ReasoningPage() {
     scenario.parameters.reduce((sum, p) => sum + p.reliability, 0) / scenario.parameters.length
 
   const constraintCount = scenario.parameters.filter((p) => p.constraintApplied).length
+  const criticalCount = scenario.parameters.filter((p) => p.importanceLevel === 'critical').length
 
   return (
     <div>
@@ -72,10 +73,32 @@ export default function ReasoningPage() {
           selectedId={activeScenario}
           onSelect={setActiveScenario}
         />
+        {scenario.engineeringImpact && (
+          <div className="card p-4 mt-4">
+            <p className="label-xs mb-2">方案对后续工程表达的影响</p>
+            <p className="text-sm text-ink-primary mb-3">
+              {scenario.engineeringImpact.downstreamDifferenceSummary}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div>
+                <p className="text-ink-secondary mb-1">对结构草图的影响</p>
+                <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.structureSketchImpact}</p>
+              </div>
+              <div>
+                <p className="text-ink-secondary mb-1">对参数表的影响</p>
+                <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.parameterTableImpact}</p>
+              </div>
+              <div>
+                <p className="text-ink-secondary mb-1">对人工复核压力的影响</p>
+                <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.reviewBurden}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats for current scenario */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
         <div className="card p-4">
           <p className="label-xs mb-2">参数总数</p>
           <p className="mono text-lg font-bold text-ink-primary">{scenario.parameters.length}</p>
@@ -87,6 +110,10 @@ export default function ReasoningPage() {
         <div className="card p-4">
           <p className="label-xs mb-2">施加约束数</p>
           <p className="mono text-lg font-bold text-ink-primary">{constraintCount}</p>
+        </div>
+        <div className="card p-4">
+          <p className="label-xs mb-2">核心约束参数</p>
+          <p className="mono text-lg font-bold text-ink-primary">{criticalCount}</p>
         </div>
         <div className="card p-4">
           <p className="label-xs mb-2">待复核项</p>
@@ -136,6 +163,9 @@ export default function ReasoningPage() {
         <h2 className="label-xs mb-3">
           方案 {activeScenario} — 设计参数详表
         </h2>
+        <p className="text-xs text-ink-tertiary mb-3">
+          关键参数将优先进入标准层组织、轴网候选与构件参数表生成；可靠度表示可信程度，重要性表示它对最终工程表达的影响权重。
+        </p>
         <ParameterTable parameters={scenario.parameters} grouped />
       </div>
 

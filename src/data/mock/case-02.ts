@@ -1,10 +1,80 @@
 import type { FacadeCase } from '../types'
+import { enrichFacadeCase } from './enrichCase'
+
+const case02ParameterMeta = {
+  外墙构造类型: {
+    parameterKey: 'wall_system',
+    importanceLevel: 'critical',
+    importanceNote: '决定修缮策略、结构表达边界与后续工程介入方式。',
+    futureUseNote: '将进入结构表达中的外围护体系与加固说明。',
+  },
+  建筑开间模数: {
+    parameterKey: 'bay_module',
+    importanceLevel: 'critical',
+    importanceNote: '是标准层组织、轴网候选和功能转译的基础约束。',
+    futureUseNote: '将进入轴网候选与标准层组织示意。',
+  },
+  标准层层高: {
+    parameterKey: 'typical_floor_height',
+    importanceLevel: 'critical',
+    importanceNote: '决定标准层使用方式、结构剖面和改造净高控制。',
+    futureUseNote: '将进入剖面控制与构件候选表。',
+  },
+  入口形式标识: {
+    parameterKey: 'entrance_form',
+    importanceLevel: 'important',
+    importanceNote: '关系到历史风貌保护与工程表达中的保留构件标注。',
+    futureUseNote: '将进入风貌保留构件清单。',
+  },
+  立面装饰体系: {
+    parameterKey: 'ornament_system',
+    importanceLevel: 'important',
+    importanceNote: '影响风貌保留与构件级修缮表达。',
+    futureUseNote: '将进入修缮节点与构件保护说明。',
+  },
+  外窗墙比: {
+    parameterKey: 'wwr',
+    importanceLevel: 'important',
+    importanceNote: '影响采光、节能和改造后的围护表达。',
+    futureUseNote: '将进入外围护参数表与性能建议。',
+  },
+  砖缝砂浆: {
+    parameterKey: 'mortar_type',
+    importanceLevel: 'important',
+    importanceNote: '决定修缮材料选型和构件兼容性。',
+  },
+  历史保护等级: {
+    parameterKey: 'heritage_grade',
+    importanceLevel: 'critical',
+    importanceNote: '是是否可进入工程表达的前置约束，必须优先确认。',
+  },
+  入口形式: {
+    parameterKey: 'entrance_form',
+    importanceLevel: 'important',
+    importanceNote: '是保留风貌与工程表达的重要控制项。',
+  },
+  二层挑台深度: {
+    parameterKey: 'balcony_depth',
+    importanceLevel: 'important',
+    importanceNote: '关系到构件级表达和活化利用后的安全校核。',
+  },
+  使用净高: {
+    parameterKey: 'usable_height',
+    importanceLevel: 'important',
+    importanceNote: '影响活化利用后的标准层组织和构件参数。',
+  },
+  二层挑台: {
+    parameterKey: 'balcony_depth',
+    importanceLevel: 'important',
+    importanceNote: '影响活化利用方案的构件表达与复核压力。',
+  },
+} as const
 
 /**
  * Case 02 — 民国里弄改造住宅
  * 特征：历史砌体外立面，AI补全比例高，待复核项多，材质老化导致识别置信度偏低
  */
-export const case02: FacadeCase = {
+export const case02: FacadeCase = enrichFacadeCase({
   id: 'case-02',
   name: '永嘉路石库门里弄修缮项目',
   location: '上海市徐汇区永嘉路',
@@ -30,6 +100,7 @@ export const case02: FacadeCase = {
       confidence: 0.88,
       source: 'direct_observation',
       basisText: '表面纹理特征吻合清末民初青砖肌理，砖缝宽度约 12–15mm，色调偏灰黑。',
+      importanceNote: '支撑外墙构造类型与修缮材质选择',
       region: { x: 0.1, y: 0.2, w: 0.7, h: 0.6 },
     },
     {
@@ -40,6 +111,7 @@ export const case02: FacadeCase = {
       confidence: 0.82,
       source: 'direct_observation',
       basisText: '通过门洞标准尺度参照，测算单间开间约 3600mm，符合里弄住宅典型尺度。',
+      importanceNote: '影响标准开间与平面推断',
       region: { x: 0.15, y: 0.1, w: 0.65, h: 0.9 },
     },
     {
@@ -50,6 +122,7 @@ export const case02: FacadeCase = {
       confidence: 0.91,
       source: 'direct_observation',
       basisText: '石库门标志性拱券入口清晰可见，拱顶雕饰完整，木框门已更换为现代金属门。',
+      importanceNote: '支撑历史保护与入口形制判定',
       region: { x: 0.3, y: 0.4, w: 0.4, h: 0.5 },
     },
     {
@@ -60,6 +133,7 @@ export const case02: FacadeCase = {
       confidence: 0.76,
       source: 'direct_observation',
       basisText: '顶部可见山花装饰，窗洞周边有凸出线脚，局部脱落约 30%，整体形态可辨识。',
+      importanceNote: '用于修缮范围与构件补全推断',
       region: { x: 0.1, y: 0.05, w: 0.8, h: 0.25 },
     },
     {
@@ -70,6 +144,7 @@ export const case02: FacadeCase = {
       confidence: 0.71,
       source: 'rule_inference',
       basisText: '民国里弄住宅层高规律推断：一层 3600mm、二三层 3300mm，结合窗洞高参照。',
+      importanceNote: '影响层高与空间参数推断',
     },
     {
       id: 'e02-06',
@@ -79,6 +154,7 @@ export const case02: FacadeCase = {
       confidence: 0.65,
       source: 'direct_observation',
       basisText: '檐口线脚局部白色灰浆脱落暴露底层，判断为水泥砂浆抹面泥塑工艺。',
+      importanceNote: '支撑修缮工艺与材料补全',
       region: { x: 0.05, y: 0.05, w: 0.9, h: 0.2 },
     },
     {
@@ -89,6 +165,7 @@ export const case02: FacadeCase = {
       confidence: 0.74,
       source: 'direct_observation',
       basisText: '传统砌体住宅开窗较小，正立面窗洞面积约占外墙 28%。',
+      importanceNote: '影响窗墙比与采光参数',
     },
     {
       id: 'e02-08',
@@ -99,6 +176,7 @@ export const case02: FacadeCase = {
       source: 'ai_completion',
       basisText:
         'AI 基于建造年代（1930s）和砖缝颜色推断：该时期普遍使用石灰砂浆，水泥砂浆普及为 1950s 后。',
+      importanceNote: '用于修缮材料选型，建议复核',
     },
     {
       id: 'e02-09',
@@ -108,6 +186,7 @@ export const case02: FacadeCase = {
       confidence: 0.48,
       source: 'ai_completion',
       basisText: 'AI 依里弄住宅典型晒台出挑深度（450–750mm）取均值，图像中遮挡严重无法直接测量。',
+      importanceNote: '影响挑台构造推断，建议现场复核',
       region: { x: 0.2, y: 0.25, w: 0.6, h: 0.2 },
     },
     {
@@ -118,6 +197,7 @@ export const case02: FacadeCase = {
       confidence: 0.42,
       source: 'pending_review',
       basisText: '图像特征符合二类历史建筑特征，但保护等级需查档案核实，不同等级修缮规范差异显著。',
+      importanceNote: '决定修缮规范适用，必须人工核实',
     },
     {
       id: 'e02-11',
@@ -127,6 +207,7 @@ export const case02: FacadeCase = {
       confidence: 0.83,
       source: 'direct_observation',
       basisText: '多点采样后剔除污迹区域，青砖本体色均值 RGB(74,74,69)，轻度风化偏浅。',
+      importanceNote: '用于立面色彩与材质表达',
     },
     {
       id: 'e02-12',
@@ -136,6 +217,7 @@ export const case02: FacadeCase = {
       confidence: 0.61,
       source: 'pending_review',
       basisText: '表面分色后识别白斑/脱皮区域约占 35%，但与正常砖缝白化难以精确区分，需现场勘查。',
+      importanceNote: '影响修缮范围与工程量估算',
     },
   ],
 
@@ -196,6 +278,13 @@ export const case02: FacadeCase = {
       label: '方案 A — 原貌修缮',
       description: '以最大保留历史原貌为原则，所有 AI 补全参数取历史典型值，不改变立面材质。',
       divergenceNote: '优先历史资料，最小干预修缮策略。',
+      recommendedUsage: 'use_after_review',
+      engineeringImpact: {
+        structureSketchImpact: '会生成以原貌保留为主的标准层与外墙保留草图，结构表达以修缮边界为主。',
+        parameterTableImpact: '参数表将突出修缮控制项、保留构件与材料兼容性。',
+        reviewBurden: '较高，保护等级与砂浆类型会直接影响能否进入后续表达。',
+        downstreamDifferenceSummary: '最接近当前历史建筑研究目标，但需先确认保护等级和材料兼容性。',
+      },
       parameters: [
         { id: 'p2-A-01', category: '构造体系', label: '外墙构造类型', value: '青砖砌体（原砖补配）', source: 'direct_observation', reliability: 0.88, basisText: '同材质修补原则' },
         { id: 'p2-A-02', category: '空间参数', label: '建筑开间模数', value: '3600', unit: 'mm', source: 'direct_observation', reliability: 0.82, basisText: '像素测量参照门洞' },
@@ -212,6 +301,13 @@ export const case02: FacadeCase = {
       label: '方案 B — 适度更新',
       description: '保留历史风貌特征，允许内侧增加保温层，热工性能适度提升。',
       divergenceNote: '立面外观不变，内侧加设岩棉保温。',
+      recommendedUsage: 'candidate_only',
+      engineeringImpact: {
+        structureSketchImpact: '结构草图会增加内侧保温层与改造层次，保留外立面轮廓不变。',
+        parameterTableImpact: '参数表将新增节能相关字段，更偏方案比选型表达。',
+        reviewBurden: '中等，保护等级确认后即可继续推进。',
+        downstreamDifferenceSummary: '适合展示历史建筑“保留外观、优化性能”的中间路径。',
+      },
       parameters: [
         { id: 'p2-B-01', category: '构造体系', label: '外墙构造类型', value: '青砖外墙 + 内侧岩棉保温', source: 'rule_inference', reliability: 0.78, basisText: '历史建筑适度改造规范', constraintApplied: '不改变外立面原貌' },
         { id: 'p2-B-02', category: '空间参数', label: '建筑开间模数', value: '3600', unit: 'mm', source: 'direct_observation', reliability: 0.82, basisText: '像素测量参照门洞' },
@@ -228,6 +324,13 @@ export const case02: FacadeCase = {
       label: '方案 C — 活化利用',
       description: '外立面保护修缮，内部改为精品民宿，层高调整，开窗适度扩大。',
       divergenceNote: '允许在风貌约束下改变内部功能，开窗比例适度提升。',
+      recommendedUsage: 'manual_confirmation_required',
+      engineeringImpact: {
+        structureSketchImpact: '会转译为带内部加固与功能重组的结构草图，变化最大。',
+        parameterTableImpact: '参数表将新增净高、扩窗和结构加固相关字段，但关键前提尚未锁定。',
+        reviewBurden: '很高，保护等级、挑台和活化边界均需先核实。',
+        downstreamDifferenceSummary: '最能展示未来系统能力，但当前不宜直接进入工程表达。',
+      },
       parameters: [
         { id: 'p2-C-01', category: '构造体系', label: '外墙构造类型', value: '青砖外墙（保留）+ 内夹层钢结构', source: 'rule_inference', reliability: 0.65, basisText: '活化利用结构加固方案', constraintApplied: '外立面不得改变' },
         { id: 'p2-C-02', category: '空间参数', label: '建筑开间模数', value: '3600', unit: 'mm', source: 'direct_observation', reliability: 0.82, basisText: '像素测量参照门洞' },
@@ -244,6 +347,63 @@ export const case02: FacadeCase = {
   overview: {
     selectedScenarioId: 'A',
     overallReliability: 0.67,
+    recommendedUsage: 'use_after_review',
+    usageReason: '当前结果可作为历史建筑修缮研究输入，但保护等级与砂浆类型等关键约束需复核后再进入正式工程表达。',
+    futureOutputs: {
+      structuralSketchPreview: {
+        title: '历史建筑修缮与加固草图',
+        summary: '以 3600mm 开间与 3300mm 层高为基础，形成标准层组织、外墙保留边界和修缮干预范围草图。',
+        axisNotes: ['开间模数：3600mm', '层高控制：3300mm（待实测）', '保护边界：入口、山花、窗框线脚需保留'],
+        organizationNote: '后续将转译为保留型标准层组织与必要的加固表达。',
+        envelopeNote: '外围护将以青砖外墙、石灰砂浆和泥塑线脚为核心表达对象。',
+      },
+      structuralParameterTable: [
+        { label: '轴线模数', value: '3600mm', importanceLevel: 'critical' },
+        { label: '标准层高', value: '3300mm', importanceLevel: 'critical' },
+        { label: '保护边界', value: '入口拱券 / 山花 / 窗框线脚', importanceLevel: 'critical' },
+        { label: '修缮材料候选', value: '青砖补配 + 石灰砂浆', importanceLevel: 'important' },
+        { label: '加固方式候选', value: '局部内嵌钢构 / 原构件加固', importanceLevel: 'important' },
+        { label: '改造净高控制', value: '2800–3300mm', importanceLevel: 'detail' },
+      ],
+      componentCandidates: [
+        {
+          label: '柱/墙体加固候选',
+          candidates: ['局部钢构加固', '砌体裂缝修补后保留'],
+          note: '取决于保护等级与活化利用边界。',
+          importanceLevel: 'critical',
+        },
+        {
+          label: '梁板候选',
+          candidates: ['小跨度保留型梁板', '轻型加层楼板'],
+          note: '用于推演活化利用后的标准层组织。',
+          importanceLevel: 'important',
+        },
+        {
+          label: '保留构件候选',
+          candidates: ['拱券门头', '山花装饰', '窗框线脚'],
+          note: '是后续构件级工程表达的重点。',
+          importanceLevel: 'important',
+        },
+      ],
+      reviewSensitiveItems: ['历史保护等级', '砖缝砂浆类型', '二层挑台深度', '表面风化程度'],
+    },
+    evolution: {
+      currentStage: {
+        title: '阶段 1：当前 demo',
+        description: '完成历史建筑证据提取、参数映射与待复核标识。',
+        bullets: ['现状证据提取', '风貌参数映射', 'AI 缺省补全', '修缮风险标注'],
+      },
+      nextStage: {
+        title: '阶段 2：结构转译',
+        description: '把历史风貌参数继续转译为保留边界、标准层组织与加固候选。',
+        bullets: ['重要性建模', '保留/更新边界推断', '加固候选生成', '修缮草图表达'],
+      },
+      targetStage: {
+        title: '阶段 3：未来系统',
+        description: '形成带可靠度标识的修缮结构图、参数表和构件级表达。',
+        bullets: ['结构草图输出', '修缮参数表', '构件级表达', '人机协同复核'],
+      },
+    },
     structuralNodes: [
       {
         id: 'sn2-bldg', type: 'system', label: '历史建筑外立面体系', value: '青砖砌体 + 石库门风格',
@@ -288,6 +448,8 @@ export const case02: FacadeCase = {
       suggestion: '优先查阅上海市历史文化风貌区保护规划档案及不动产登记信息，确认保护等级后再推进设计。',
       priority: 'high',
       relatedEvidenceIds: ['e02-10'],
+      relatedParameterKeys: ['heritage_grade'],
+      blocksUsage: true,
     },
     {
       id: 'rv-02-02',
@@ -297,6 +459,8 @@ export const case02: FacadeCase = {
       suggestion: '现场取砂浆样本进行 XRF 或湿化学分析，确认砂浆成分后选择兼容的修补材料。',
       priority: 'high',
       relatedEvidenceIds: ['e02-08'],
+      relatedParameterKeys: ['mortar_type'],
+      blocksUsage: true,
     },
     {
       id: 'rv-02-03',
@@ -306,6 +470,7 @@ export const case02: FacadeCase = {
       suggestion: '现场实测挑台净尺寸，同时检查挑台结构是否存在安全隐患。',
       priority: 'medium',
       relatedEvidenceIds: ['e02-09'],
+      relatedParameterKeys: ['balcony_depth'],
     },
     {
       id: 'rv-02-04',
@@ -324,6 +489,7 @@ export const case02: FacadeCase = {
       suggestion: '实地用全站仪或激光测距测量各层实际层高。',
       priority: 'low',
       relatedEvidenceIds: ['e02-05'],
+      relatedParameterKeys: ['typical_floor_height'],
     },
   ],
-}
+}, { parameterMetaByLabel: case02ParameterMeta })

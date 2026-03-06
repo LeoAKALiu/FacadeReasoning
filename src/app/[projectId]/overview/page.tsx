@@ -7,6 +7,11 @@ import { StructureExpressionTable } from '@/components/overview/StructureExpress
 import { ReviewItemCard } from '@/components/overview/ReviewItemCard'
 import { ReliabilityDot } from '@/components/overview/ReliabilityDot'
 import { SourceBadge } from '@/components/evidence/SourceBadge'
+import { ParameterImportanceBadge } from '@/components/shared/ParameterImportanceBadge'
+import { UsageRecommendationCard } from '@/components/shared/UsageRecommendationCard'
+import { EngineeringTranslationFlow } from '@/components/shared/EngineeringTranslationFlow'
+import { FutureOutputPreview } from '@/components/shared/FutureOutputPreview'
+import { SystemEvolutionRoadmap } from '@/components/shared/SystemEvolutionRoadmap'
 import { formatReliability, reliabilityToColor } from '@/lib/utils'
 
 /**
@@ -33,6 +38,11 @@ export default function OverviewPage() {
   const totalParams = selectedScenario?.parameters.length ?? 0
   const pendingCount = reviewItems.length
   const highPriorityCount = reviewItems.filter((r) => r.priority === 'high').length
+  const groupedByImportance = {
+    critical: selectedScenario?.parameters.filter((parameter) => parameter.importanceLevel === 'critical') ?? [],
+    important: selectedScenario?.parameters.filter((parameter) => parameter.importanceLevel === 'important') ?? [],
+    detail: selectedScenario?.parameters.filter((parameter) => parameter.importanceLevel === 'detail') ?? [],
+  }
 
   return (
     <div>
@@ -99,28 +109,75 @@ export default function OverviewPage() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <UsageRecommendationCard
+          usage={overview.recommendedUsage}
+          reason={overview.usageReason}
+        />
+      </div>
+
       {/* Main two-column layout */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Structural expression table (2/3 width) */}
-        <div className="xl:col-span-2">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="section-heading">结构表达</h2>
-            <div className="flex items-center gap-3 text-xs text-ink-tertiary">
-              <span>可靠度</span>
-              <div className="flex items-center gap-1">
-                <div className="h-2 w-16 rounded-full" style={{ background: 'linear-gradient(to right, #EF4444, #EAB308, #22C55E)' }} />
-                <span>低 → 高</span>
+        <div className="xl:col-span-2 space-y-6">
+          <EngineeringTranslationFlow bridgeNote="当前结果不会停留在参数树层，而是会继续生成结构草图、结构参数表与构件级表达。" />
+
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="section-heading">结构表达</h2>
+              <div className="flex items-center gap-3 text-xs text-ink-tertiary">
+                <span>可靠度</span>
+                <div className="flex items-center gap-1">
+                  <div className="h-2 w-16 rounded-full" style={{ background: 'linear-gradient(to right, #EF4444, #EAB308, #22C55E)' }} />
+                  <span>低 → 高</span>
+                </div>
               </div>
             </div>
+            <StructureExpressionTable
+              nodes={overview.structuralNodes}
+              defaultExpanded
+            />
           </div>
-          <StructureExpressionTable
-            nodes={overview.structuralNodes}
-            defaultExpanded
-          />
+
+          <FutureOutputPreview futureOutputs={overview.futureOutputs} />
         </div>
 
         {/* Right column: review items + source legend */}
         <div className="space-y-6">
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="label-xs">参数重要性分级</h2>
+              <span className="text-2xs text-ink-tertiary">可靠度与重要性分开表达</span>
+            </div>
+            <div className="space-y-4">
+              {([
+                ['critical', groupedByImportance.critical],
+                ['important', groupedByImportance.important],
+                ['detail', groupedByImportance.detail],
+              ] as const).map(([level, items]) => (
+                <div key={level}>
+                  <div className="flex items-center justify-between mb-2">
+                    <ParameterImportanceBadge level={level} />
+                    <span className="text-2xs text-ink-tertiary">{items.length} 项</span>
+                  </div>
+                  <div className="space-y-2">
+                    {items.slice(0, 4).map((parameter) => (
+                      <div key={parameter.id} className="rounded-md border border-border bg-surface-raised px-3 py-2">
+                        <p className="text-xs text-ink-primary">{parameter.label}</p>
+                        <p className="text-2xs text-ink-tertiary mt-1 leading-relaxed">
+                          {parameter.importanceNote}
+                        </p>
+                      </div>
+                    ))}
+                    {items.length === 0 && (
+                      <p className="text-2xs text-ink-tertiary">暂无该级别参数</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Source legend */}
           <div className="card p-4">
             <h2 className="label-xs mb-3">可靠度颜色说明</h2>
@@ -160,6 +217,8 @@ export default function OverviewPage() {
               ))}
             </div>
           </div>
+
+          <SystemEvolutionRoadmap evolution={overview.evolution} />
 
           {/* Review items */}
           {reviewItems.length > 0 && (

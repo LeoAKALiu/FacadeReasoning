@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import type { DesignParameter } from '@/data/types'
 import { SourceBadge } from '@/components/evidence/SourceBadge'
 import { ReliabilityDot } from '@/components/overview/ReliabilityDot'
+import { ParameterImportanceBadge } from '@/components/shared/ParameterImportanceBadge'
 
 interface ParameterTableProps {
   parameters: DesignParameter[]
@@ -18,9 +19,17 @@ interface ParameterTableProps {
  */
 export function ParameterTable({ parameters, grouped = true }: ParameterTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const importanceOrder = { critical: 0, important: 1, detail: 2 } as const
+
+  const sortedParameters = [...parameters].sort((a, b) => {
+    const aRank = a.importanceLevel ? importanceOrder[a.importanceLevel] : 99
+    const bRank = b.importanceLevel ? importanceOrder[b.importanceLevel] : 99
+    if (aRank !== bRank) return aRank - bRank
+    return a.label.localeCompare(b.label, 'zh-CN')
+  })
 
   const categories = grouped
-    ? [...new Set(parameters.map((p) => p.category))]
+    ? [...new Set(sortedParameters.map((p) => p.category))]
     : []
 
   const renderRow = (p: DesignParameter) => {
@@ -39,7 +48,15 @@ export function ParameterTable({ parameters, grouped = true }: ParameterTablePro
 
           {/* Label */}
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-ink-primary">{p.label}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm text-ink-primary">{p.label}</p>
+              <ParameterImportanceBadge level={p.importanceLevel} />
+            </div>
+            {p.importanceNote && (
+              <p className="text-2xs text-ink-tertiary mt-0.5 leading-relaxed">
+                {p.importanceNote}
+              </p>
+            )}
             {p.constraintApplied && (
               <p className="text-2xs text-ink-tertiary mt-0.5 flex items-center gap-1">
                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
@@ -79,6 +96,12 @@ export function ParameterTable({ parameters, grouped = true }: ParameterTablePro
               <SourceBadge source={p.source} variant="badge" />
             </div>
             <p className="text-xs text-ink-secondary leading-relaxed">{p.basisText}</p>
+            {p.importanceNote && (
+              <div className="mt-2 flex items-start gap-1.5 text-xs text-ink-tertiary">
+                <span className="text-accent font-medium shrink-0">工程影响：</span>
+                <span>{p.importanceNote}</span>
+              </div>
+            )}
             {p.constraintApplied && (
               <div className="mt-2 flex items-start gap-1.5 text-xs text-ink-tertiary">
                 <span className="text-infer font-medium shrink-0">约束：</span>
@@ -94,7 +117,7 @@ export function ParameterTable({ parameters, grouped = true }: ParameterTablePro
   if (!grouped) {
     return (
       <div className="card overflow-hidden divide-y divide-border">
-        {parameters.map(renderRow)}
+        {sortedParameters.map(renderRow)}
       </div>
     )
   }
@@ -102,7 +125,7 @@ export function ParameterTable({ parameters, grouped = true }: ParameterTablePro
   return (
     <div className="space-y-4">
       {categories.map((cat) => {
-        const catParams = parameters.filter((p) => p.category === cat)
+        const catParams = sortedParameters.filter((p) => p.category === cat)
         return (
           <div key={cat} className="card overflow-hidden">
             <div className="px-4 py-2.5 bg-surface-raised border-b border-border">

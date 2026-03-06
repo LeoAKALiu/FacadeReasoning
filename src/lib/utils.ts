@@ -1,4 +1,8 @@
-import type { EvidenceSource } from '@/data/types'
+import type {
+  EvidenceSource,
+  ParameterImportanceLevel,
+  RecommendedUsage,
+} from '@/data/types'
 
 /**
  * Combines class names, filtering out falsy values.
@@ -49,6 +53,22 @@ export function getSourceColors(source: EvidenceSource): {
 }
 
 /**
+ * Returns hex color for each evidence source (for inline styles, e.g. image highlight).
+ */
+export function getSourceHex(source: EvidenceSource): string {
+  switch (source) {
+    case 'direct_observation':
+      return '#22C55E'
+    case 'rule_inference':
+      return '#3B82F6'
+    case 'ai_completion':
+      return '#A855F7'
+    case 'pending_review':
+      return '#F59E0B'
+  }
+}
+
+/**
  * Returns a human-readable Chinese label for each evidence source type.
  */
 export function getSourceLabel(source: EvidenceSource): string {
@@ -81,6 +101,78 @@ export function reliabilityToColor(value: number): string {
  */
 export function formatReliability(value: number): string {
   return `${Math.round(value * 100)}%`
+}
+
+/**
+ * Returns reliability level label for display (high / medium / low).
+ */
+export function getReliabilityLevel(value: number): '高可靠度' | '中可靠度' | '低可靠度' {
+  const clamped = Math.max(0, Math.min(1, value))
+  if (clamped >= 0.85) return '高可靠度'
+  if (clamped >= 0.65) return '中可靠度'
+  return '低可靠度'
+}
+
+/**
+ * Returns label and classes for parameter importance.
+ */
+export function getImportanceMeta(level: ParameterImportanceLevel): {
+  label: string
+  classes: string
+} {
+  switch (level) {
+    case 'critical':
+      return {
+        label: '核心约束参数',
+        classes: 'bg-red-950/50 text-red-300 border border-red-900/70',
+      }
+    case 'important':
+      return {
+        label: '关键增强参数',
+        classes: 'bg-blue-950/50 text-blue-300 border border-blue-900/70',
+      }
+    case 'detail':
+      return {
+        label: '细节补充参数',
+        classes: 'bg-slate-800/80 text-slate-300 border border-slate-700',
+      }
+  }
+}
+
+/**
+ * Returns display meta for overview/export usage recommendation.
+ */
+export function getRecommendedUsageMeta(usage: RecommendedUsage): {
+  label: string
+  description: string
+  classes: string
+} {
+  switch (usage) {
+    case 'direct_use':
+      return {
+        label: '可直接使用',
+        description: '结果已具备较强稳定性，可直接进入下一步结构表达。',
+        classes: 'bg-observe-subtle text-observe border border-observe-muted',
+      }
+    case 'use_after_review':
+      return {
+        label: '建议复核后使用',
+        description: '主干结果已成型，但关键约束参数需复核后再进入工程表达。',
+        classes: 'bg-infer-subtle text-infer border border-infer-muted',
+      }
+    case 'candidate_only':
+      return {
+        label: '仅供候选参考',
+        description: '适合作为方案比选和未来系统投影，不建议直接进入正式表达。',
+        classes: 'bg-ai-subtle text-ai border border-ai-muted',
+      }
+    case 'manual_confirmation_required':
+      return {
+        label: '必须人工确认',
+        description: '关键前提尚未锁定，当前结果只能作为研究性草案。',
+        classes: 'bg-review-subtle text-review border border-review-muted',
+      }
+  }
 }
 
 /**

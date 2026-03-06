@@ -46,6 +46,8 @@ export interface Evidence {
   source: EvidenceSource
   basisText: string
   region?: EvidenceRegion
+  /** Short line explaining why this evidence matters for design reasoning. */
+  importanceNote?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -72,20 +74,82 @@ export interface ParameterMapping {
   evidenceIds: string[]
   confidence: number // 0–1
   mappingReason: string
+  parameterKey?: string
+  importanceLevel?: ParameterImportanceLevel
+  importanceNote?: string
+  futureUseNote?: string
 }
 
 // ---------------------------------------------------------------------------
 // Design Parameters — the typed, categorised parameter set
 // ---------------------------------------------------------------------------
 
+export type ParameterImportanceLevel = 'critical' | 'important' | 'detail'
+
+export type RecommendedUsage =
+  | 'direct_use'
+  | 'use_after_review'
+  | 'candidate_only'
+  | 'manual_confirmation_required'
+
+export interface FutureOutputTableRow {
+  label: string
+  value: string
+  importanceLevel: ParameterImportanceLevel
+}
+
+export interface FutureOutputComponentCandidate {
+  label: string
+  candidates: string[]
+  note: string
+  importanceLevel: ParameterImportanceLevel
+}
+
+export interface StructuralSketchPreview {
+  title: string
+  summary: string
+  axisNotes: string[]
+  organizationNote: string
+  envelopeNote: string
+}
+
+export interface FutureOutputs {
+  structuralSketchPreview: StructuralSketchPreview
+  structuralParameterTable: FutureOutputTableRow[]
+  componentCandidates: FutureOutputComponentCandidate[]
+  reviewSensitiveItems: string[]
+}
+
+export interface EngineeringImpact {
+  structureSketchImpact: string
+  parameterTableImpact: string
+  reviewBurden: string
+  downstreamDifferenceSummary: string
+}
+
+export interface EvolutionStage {
+  title: string
+  description: string
+  bullets: string[]
+}
+
+export interface EvolutionPath {
+  currentStage: EvolutionStage
+  nextStage: EvolutionStage
+  targetStage: EvolutionStage
+}
+
 export interface DesignParameter {
   id: string
+  parameterKey?: string
   category: string
   label: string
   value: string
   unit?: string
   source: EvidenceSource
   reliability: number // 0–1
+  importanceLevel?: ParameterImportanceLevel
+  importanceNote?: string
   basisText: string
   constraintApplied?: string
 }
@@ -100,6 +164,8 @@ export interface Scenario {
   description: string
   divergenceNote: string // key difference from other scenarios
   parameters: DesignParameter[]
+  engineeringImpact?: EngineeringImpact
+  recommendedUsage?: RecommendedUsage
 }
 
 // ---------------------------------------------------------------------------
@@ -108,6 +174,7 @@ export interface Scenario {
 
 export interface StructuralNode {
   id: string
+  parameterKey?: string
   type: string
   label: string
   value: string
@@ -120,6 +187,10 @@ export interface StructuralNode {
 export interface OverviewResult {
   selectedScenarioId: 'A' | 'B' | 'C'
   overallReliability: number
+  recommendedUsage?: RecommendedUsage
+  usageReason?: string
+  futureOutputs?: FutureOutputs
+  evolution?: EvolutionPath
   structuralNodes: StructuralNode[]
 }
 
@@ -135,6 +206,8 @@ export interface ReviewItem {
   suggestion: string
   priority: 'high' | 'medium' | 'low'
   relatedEvidenceIds: string[]
+  relatedParameterKeys?: string[]
+  blocksUsage?: boolean
 }
 
 // ---------------------------------------------------------------------------

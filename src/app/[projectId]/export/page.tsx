@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCaseById } from '@/data/index'
 import { ReportCanvas } from '@/components/export/ReportCanvas'
+import { ParameterImportanceBadge } from '@/components/shared/ParameterImportanceBadge'
+import { UsageRecommendationCard } from '@/components/shared/UsageRecommendationCard'
+import { SystemEvolutionRoadmap } from '@/components/shared/SystemEvolutionRoadmap'
 import { formatReliability, reliabilityToColor } from '@/lib/utils'
 
 /**
@@ -15,7 +18,6 @@ export default function ExportPage() {
   const projectId = params.projectId as string
   const facadeCase = getCaseById(projectId)
   const printRef = useRef<HTMLDivElement>(null)
-  const [exporting, setExporting] = useState(false)
   const [copied, setCopied] = useState(false)
 
   if (!facadeCase) {
@@ -41,6 +43,8 @@ export default function ExportPage() {
   ) ?? facadeCase.scenarios[0]
 
   const overallColor = reliabilityToColor(facadeCase.overview.overallReliability)
+  const criticalParameters = scenario.parameters.filter((parameter) => parameter.importanceLevel === 'critical')
+  const highPriorityReviewItems = facadeCase.reviewItems.filter((item) => item.priority === 'high')
 
   return (
     <div>
@@ -93,6 +97,42 @@ export default function ExportPage() {
               </div>
             </div>
           </div>
+
+          <UsageRecommendationCard
+            usage={facadeCase.overview.recommendedUsage}
+            reason={facadeCase.overview.usageReason}
+          />
+
+          <div className="card p-4">
+            <h2 className="label-xs mb-3">关键参数与重要性</h2>
+            <div className="space-y-3">
+              {criticalParameters.slice(0, 5).map((parameter) => (
+                <div key={parameter.id} className="rounded-md border border-border bg-surface-raised px-3 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm text-ink-primary">{parameter.label}</p>
+                    <ParameterImportanceBadge level={parameter.importanceLevel} />
+                  </div>
+                  <p className="mono text-xs text-accent mt-1">
+                    {parameter.value}{parameter.unit ? ` ${parameter.unit}` : ''}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {highPriorityReviewItems.length > 0 && (
+            <div className="card p-4">
+              <h2 className="label-xs mb-3">高优先复核项</h2>
+              <div className="space-y-2">
+                {highPriorityReviewItems.map((item) => (
+                  <div key={item.id} className="rounded-md border border-review-muted bg-review-subtle px-3 py-2">
+                    <p className="text-sm text-review">{item.parameterLabel}</p>
+                    <p className="text-2xs text-ink-tertiary mt-1 leading-relaxed">{item.suggestion}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Export buttons */}
           <div className="card p-4 space-y-2">
@@ -161,6 +201,8 @@ export default function ExportPage() {
               ))}
             </div>
           </div>
+
+          <SystemEvolutionRoadmap evolution={facadeCase.overview.evolution} />
         </div>
 
         {/* Report preview */}

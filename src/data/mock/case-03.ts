@@ -1,10 +1,69 @@
 import type { FacadeCase } from '../types'
+import { enrichFacadeCase } from './enrichCase'
+
+const case03ParameterMeta = {
+  幕墙面板体系: {
+    parameterKey: 'panel_system',
+    importanceLevel: 'important',
+    importanceNote: '决定构件级表达、节点体系与工程表达中的外围护描述。',
+    futureUseNote: '将转译为面板体系说明和构件表。',
+  },
+  参数化分格逻辑: {
+    parameterKey: 'panelization_logic',
+    importanceLevel: 'critical',
+    importanceNote: '是结构草图、轴网候选和构件组织方式的核心控制项。',
+    futureUseNote: '将直接控制结构草图与标准层组织示意。',
+  },
+  板块旋转基准角: {
+    parameterKey: 'rotation_angle',
+    importanceLevel: 'critical',
+    importanceNote: '不同旋转逻辑会导向完全不同的工程表达结果。',
+    futureUseNote: '将直接影响结构草图、构件参数表与方案分歧说明。',
+  },
+  商业层净高: {
+    parameterKey: 'retail_clear_height',
+    importanceLevel: 'critical',
+    importanceNote: '是商业裙楼结构表达的核心空间约束。',
+    futureUseNote: '将进入标准层组织与构件尺寸表。',
+  },
+  立面透明度梯度策略: {
+    parameterKey: 'transparency_gradient',
+    importanceLevel: 'important',
+    importanceNote: '关系到外围护体系与性能表达的完整性。',
+    futureUseNote: '将进入外围护参数表与性能策略说明。',
+  },
+  铝板涂层: {
+    parameterKey: 'panel_finish',
+    importanceLevel: 'detail',
+    importanceNote: '用于完善构件级表达与材质说明。',
+  },
+  曲面曲率半径: {
+    parameterKey: 'curvature_radius',
+    importanceLevel: 'important',
+    importanceNote: '决定结构草图中的曲面控制边界与构件展开策略。',
+  },
+  板块旋转范围: {
+    parameterKey: 'rotation_angle',
+    importanceLevel: 'critical',
+    importanceNote: '控制渐变旋转逻辑，是多方案差异的核心约束。',
+  },
+  折板折叠角: {
+    parameterKey: 'fold_angle',
+    importanceLevel: 'critical',
+    importanceNote: '一旦采用折板逻辑，将改写整个构件级表达。',
+  },
+  基础网格尺寸: {
+    parameterKey: 'orthogonal_grid_size',
+    importanceLevel: 'important',
+    importanceNote: '影响正交折板体系下的结构模数与构件展开。',
+  },
+} as const
 
 /**
  * Case 03 — 参数化异形铝板幕墙商业裙楼
  * 特征：规则推断为主，方案 A/B/C 分歧明显，几何关系复杂
  */
-export const case03: FacadeCase = {
+export const case03: FacadeCase = enrichFacadeCase({
   id: 'case-03',
   name: '前滩国际商业中心裙楼',
   location: '上海市浦东新区前滩',
@@ -30,6 +89,7 @@ export const case03: FacadeCase = {
       confidence: 0.91,
       source: 'direct_observation',
       basisText: '面板表面反光特征符合烤漆铝板（非镜面），部分板块可见规律圆孔阵列，为穿孔铝板区域。',
+      importanceNote: '支撑幕墙面板体系判定',
       region: { x: 0.1, y: 0.1, w: 0.8, h: 0.8 },
     },
     {
@@ -40,6 +100,7 @@ export const case03: FacadeCase = {
       confidence: 0.87,
       source: 'direct_observation',
       basisText: '板缝走向呈 ±45° 菱形网格，每菱形单元对角线尺寸通过像素标定测算。',
+      importanceNote: '支撑分格形式与参数化逻辑推断',
       region: { x: 0.2, y: 0.2, w: 0.6, h: 0.6 },
     },
     {
@@ -50,6 +111,7 @@ export const case03: FacadeCase = {
       confidence: 0.82,
       source: 'direct_observation',
       basisText: '参照层高推算，菱形短轴约 900mm，长轴约 1400mm，比例约 1:1.56。',
+      importanceNote: '影响模数体系与板块尺寸推断',
       region: { x: 0.25, y: 0.3, w: 0.5, h: 0.5 },
     },
     {
@@ -61,6 +123,7 @@ export const case03: FacadeCase = {
       source: 'pending_review',
       basisText:
         '由于双曲面透视畸变，板块旋转角度存在 30°/45°/60° 三种解析可能，当前无法确定基准角。',
+      importanceNote: '多解分歧关键项，影响方案 A/B/C 差异',
       region: { x: 0.3, y: 0.2, w: 0.4, h: 0.6 },
     },
     {
@@ -71,6 +134,7 @@ export const case03: FacadeCase = {
       confidence: 0.79,
       source: 'rule_inference',
       basisText: '商业裙楼典型层高 4800–5400mm，结合板块尺度参照取上限值。',
+      importanceNote: '影响层高与立面分格推断',
     },
     {
       id: 'e03-06',
@@ -80,6 +144,7 @@ export const case03: FacadeCase = {
       confidence: 0.85,
       source: 'direct_observation',
       basisText: '多区域采样剔除光晕后，面板主色 RGB(250,245,238) 与 RAL9001 高度吻合。',
+      importanceNote: '用于立面色彩与材质表达',
     },
     {
       id: 'e03-07',
@@ -89,6 +154,7 @@ export const case03: FacadeCase = {
       confidence: 0.74,
       source: 'direct_observation',
       basisText: '底部穿孔板密度更高（视觉更通透），往上渐变为实板，形成透明度梯度。',
+      importanceNote: '影响穿孔规律与立面表现推断',
       region: { x: 0.1, y: 0.0, w: 0.8, h: 1.0 },
     },
     {
@@ -99,6 +165,7 @@ export const case03: FacadeCase = {
       confidence: 0.76,
       source: 'direct_observation',
       basisText: '近景区域板缝宽度测算约 15mm，为标准铝板幕墙公差范围。',
+      importanceNote: '用于构造细部与模数校验',
     },
     {
       id: 'e03-09',
@@ -109,6 +176,7 @@ export const case03: FacadeCase = {
       source: 'ai_completion',
       basisText:
         'AI 通过透视线收敛角估算水平曲率半径约 25m，双曲面曲率在图像中难以精确解析，误差可能超过 ±30%。',
+      importanceNote: '影响曲面几何参数，建议复核',
     },
     {
       id: 'e03-10',
@@ -118,6 +186,7 @@ export const case03: FacadeCase = {
       confidence: 0.66,
       source: 'rule_inference',
       basisText: '基于穿孔区域视觉透明度与典型穿孔铝板规格（ϕ6@16mm，开孔率约 30–35%），取下限值。',
+      importanceNote: '影响穿孔板开孔率参数',
     },
   ],
 
@@ -170,6 +239,13 @@ export const case03: FacadeCase = {
       label: '方案 A — 45° 旋转逻辑',
       description: '基准旋转角为 45°，菱形为正旋转矩形，板块排列简洁，结构逻辑清晰。',
       divergenceNote: '最常见的参数化菱形分格解，加工最经济。',
+      recommendedUsage: 'use_after_review',
+      engineeringImpact: {
+        structureSketchImpact: '可形成最清晰的参数化结构草图，轴网和板块逻辑相对稳定。',
+        parameterTableImpact: '参数表最易收敛到可读的模数、净高和面板体系表达。',
+        reviewBurden: '中等，主要集中在旋转角与曲率半径确认。',
+        downstreamDifferenceSummary: '是当前最适合作为工程表达主线的方案，但关键几何仍需复核。',
+      },
       parameters: [
         { id: 'p3-A-01', category: '材料参数', label: '幕墙面板体系', value: '烤漆铝单板（穿孔+实板交替）', source: 'direct_observation', reliability: 0.91, basisText: '立面直接观测' },
         { id: 'p3-A-02', category: '立面构成', label: '参数化分格逻辑', value: '45° 旋转 900×1400mm 菱形', source: 'direct_observation', reliability: 0.84, basisText: '像素测量 + 45° 假设' },
@@ -185,6 +261,13 @@ export const case03: FacadeCase = {
       label: '方案 B — 30° 渐变旋转逻辑',
       description: '基准旋转角为 30°，板块沿高度方向做角度渐变（30°→60°），产生动态扭转效果。',
       divergenceNote: '视觉更复杂，每块角度不同，加工成本显著增加。',
+      recommendedUsage: 'candidate_only',
+      engineeringImpact: {
+        structureSketchImpact: '会导向更复杂的渐变轴网与板块组织，结构草图表现更强但不稳定。',
+        parameterTableImpact: '参数表需额外表达角度梯度与加工差异，适合展示未来系统能力。',
+        reviewBurden: '高，渐变角度范围与曲面边界都需三维验证。',
+        downstreamDifferenceSummary: '适合做方案对比展示，不适合作为当前工程表达的唯一主线。',
+      },
       parameters: [
         { id: 'p3-B-01', category: '材料参数', label: '幕墙面板体系', value: '烤漆铝单板（穿孔+实板交替）', source: 'direct_observation', reliability: 0.91, basisText: '立面直接观测' },
         { id: 'p3-B-02', category: '立面构成', label: '参数化分格逻辑', value: '渐变旋转 30°→60° 菱形', source: 'rule_inference', reliability: 0.62, basisText: '透视线分析推断旋转渐变', constraintApplied: '每列板块角度独立，加工需 CNC 定制' },
@@ -200,6 +283,13 @@ export const case03: FacadeCase = {
       label: '方案 C — 正交分格折叠逻辑',
       description: '基础网格为正交矩形，通过折叠角度产生视觉菱形效果，非真菱形分格。',
       divergenceNote: '与方案 A/B 几何逻辑根本不同，板块为矩形折板，非菱形平板。',
+      recommendedUsage: 'manual_confirmation_required',
+      engineeringImpact: {
+        structureSketchImpact: '将改写为折板构件体系的结构草图，外围护和节点表达都与 A/B 不同。',
+        parameterTableImpact: '参数表会转向折板角、正交网格和专项节点，当前证据支撑不足。',
+        reviewBurden: '很高，截面形式和折角一旦判断错误，后续所有工程表达都需重做。',
+        downstreamDifferenceSummary: '最能体现未来系统的分歧处理能力，但当前仅适合作为探索型候选。',
+      },
       parameters: [
         { id: 'p3-C-01', category: '材料参数', label: '幕墙面板体系', value: '折板铝单板（V型折叠）', source: 'rule_inference', reliability: 0.62, basisText: '折板逻辑推断，需近景确认截面形式', constraintApplied: '折板需专项防水节点设计' },
         { id: 'p3-C-02', category: '立面构成', label: '参数化分格逻辑', value: '正交基础网格 + V型折叠', source: 'rule_inference', reliability: 0.58, basisText: '正交折板产生视觉菱形效果', constraintApplied: '折板幕墙系统需单独结构计算' },
@@ -215,6 +305,63 @@ export const case03: FacadeCase = {
   overview: {
     selectedScenarioId: 'A',
     overallReliability: 0.71,
+    recommendedUsage: 'candidate_only',
+    usageReason: '当前结果已能支撑参数化幕墙的结构表达预演，但旋转基准角与曲率半径仍是关键未锁定项，更适合作为候选方案参考。',
+    futureOutputs: {
+      structuralSketchPreview: {
+        title: '参数化幕墙结构草图',
+        summary: '以 45° 旋转逻辑、900×1400mm 菱形模数和 4800mm 商业净高为基础，组织轴线、构件排布和外围护轮廓。',
+        axisNotes: ['基础模数：900×1400mm 菱形', '商业净高：4800mm', '旋转角：45°（待锁定）'],
+        organizationNote: '标准层组织将围绕参数化分格逻辑与商业大空间净高要求展开。',
+        envelopeNote: '外围护将转译为铝板面板体系、透明度梯度与曲率控制三类表达。',
+      },
+      structuralParameterTable: [
+        { label: '轴线模数', value: '900×1400mm 菱形', importanceLevel: 'critical' },
+        { label: '商业层净高', value: '4800mm', importanceLevel: 'critical' },
+        { label: '板块旋转角', value: '45°（待复核）', importanceLevel: 'critical' },
+        { label: '曲率半径', value: '约 25000mm', importanceLevel: 'important' },
+        { label: '穿孔透明度梯度', value: '底部 30% → 顶部 0%', importanceLevel: 'important' },
+        { label: '面板体系', value: '烤漆铝单板（穿孔/实板）', importanceLevel: 'important' },
+      ],
+      componentCandidates: [
+        {
+          label: '柱位候选',
+          candidates: ['9m 大跨商业柱网', '局部退柱组织'],
+          note: '需与商业净高与曲面边界协同生成。',
+          importanceLevel: 'critical',
+        },
+        {
+          label: '梁截面候选',
+          candidates: ['500×900', '600×1000'],
+          note: '受大跨商业空间与幕墙挂接方式影响。',
+          importanceLevel: 'important',
+        },
+        {
+          label: '面板构件候选',
+          candidates: ['平板菱形单元', '渐变旋转单元', '折板 V 型单元'],
+          note: '直接对应 A/B/C 三种工程表达路径。',
+          importanceLevel: 'critical',
+        },
+      ],
+      reviewSensitiveItems: ['板块旋转基准角', '外立面曲率半径', '板块分格逻辑类型'],
+    },
+    evolution: {
+      currentStage: {
+        title: '阶段 1：当前 demo',
+        description: '已完成参数化幕墙证据提取、参数映射与多方案推理。',
+        bullets: ['面板体系识别', '参数化逻辑映射', '多方案推理', '待复核项标识'],
+      },
+      nextStage: {
+        title: '阶段 2：结构转译',
+        description: '把参数逻辑继续转译为轴网候选、构件候选与参数化结构草图。',
+        bullets: ['重要性建模', '轴网/构件候选生成', '参数化草图', '工程影响对比'],
+      },
+      targetStage: {
+        title: '阶段 3：未来系统',
+        description: '输出带可靠度标识的结构图、构件级表达和参数表，支撑人机协同复核。',
+        bullets: ['结构图输出', '构件参数表', '节点候选表达', '工程接口'],
+      },
+    },
     structuralNodes: [
       {
         id: 'sn3-facade', type: 'system', label: '参数化铝板幕墙体系', value: '菱形分格烤漆铝单板',
@@ -261,6 +408,8 @@ export const case03: FacadeCase = {
       suggestion: '获取设计方的参数化模型文件（GH/Rhino），或对现场进行激光点云扫描后匹配几何模型。',
       priority: 'high',
       relatedEvidenceIds: ['e03-04'],
+      relatedParameterKeys: ['rotation_angle'],
+      blocksUsage: true,
     },
     {
       id: 'rv-03-02',
@@ -270,6 +419,8 @@ export const case03: FacadeCase = {
       suggestion: '现场激光测距或无人机倾斜摄影获取精确点云，重建曲面后提取精确曲率。',
       priority: 'high',
       relatedEvidenceIds: ['e03-09'],
+      relatedParameterKeys: ['curvature_radius'],
+      blocksUsage: true,
     },
     {
       id: 'rv-03-03',
@@ -279,6 +430,7 @@ export const case03: FacadeCase = {
       suggestion: '现场近距离观测或查看竣工图纸，确认板块截面形式（平板还是折板）。',
       priority: 'medium',
       relatedEvidenceIds: ['e03-01', 'e03-02'],
+      relatedParameterKeys: ['panel_system', 'panelization_logic'],
     },
   ],
-}
+}, { parameterMetaByLabel: case03ParameterMeta })

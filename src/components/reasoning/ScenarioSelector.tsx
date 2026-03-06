@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import type { Scenario } from '@/data/types'
+import { getRecommendedUsageMeta } from '@/lib/utils'
 
 interface ScenarioSelectorProps {
   scenarios: Scenario[]
@@ -24,6 +25,9 @@ export function ScenarioSelector({
       <div className="flex items-stretch gap-3">
         {scenarios.map((s) => {
           const isActive = s.id === selectedId
+          const usageMeta = s.recommendedUsage
+            ? getRecommendedUsageMeta(s.recommendedUsage)
+            : null
           return (
             <button
               key={s.id}
@@ -54,6 +58,16 @@ export function ScenarioSelector({
                 </span>
               </div>
               <p className="text-xs text-ink-tertiary leading-relaxed">{s.divergenceNote}</p>
+              {usageMeta && (
+                <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-2xs font-medium ${usageMeta.classes}`}>
+                  {usageMeta.label}
+                </span>
+              )}
+              {s.engineeringImpact && (
+                <p className="text-2xs text-ink-tertiary mt-2 leading-relaxed">
+                  {s.engineeringImpact.downstreamDifferenceSummary}
+                </p>
+              )}
             </button>
           )
         })}
