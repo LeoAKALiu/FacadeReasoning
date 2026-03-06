@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --scrollbar-thumb: #374151;
+  --scrollbar-track: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0A0D14;
+  color: #F9FAFB;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4B5563;
+}
+
+/* Mono number class */
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Utility: hide scrollbar but keep scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Print styles for export page */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-lg;
+  }
+
+  .card-raised {
+    @apply bg-surface-raised border border-border rounded-lg;
+  }
+
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-hover text-white text-sm font-medium px-4 py-2 rounded-md transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-raised hover:bg-surface-overlay text-ink-primary text-sm font-medium px-4 py-2 rounded-md border border-border transition-colors;
+  }
+
+  .btn-ghost {
+    @apply text-ink-secondary hover:text-ink-primary hover:bg-surface-raised text-sm px-3 py-1.5 rounded-md transition-colors;
+  }
+
+  .label-xs {
+    @apply text-xs font-medium text-ink-tertiary uppercase tracking-wider;
+  }
+
+  .section-heading {
+    @apply text-base font-semibold text-ink-primary;
+  }
+
+  .divider {
+    @apply border-t border-border;
+  }
+}
