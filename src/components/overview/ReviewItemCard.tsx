@@ -9,15 +9,17 @@ interface ReviewItemCardProps {
   index: number
   /** When set, high-priority items show a detail thumbnail. */
   projectId?: string
+  /** 1-based detail image slot (1–4) derived from related evidence index; avoids using review list index. */
+  detailSlot?: number | null
 }
 
 /**
  * Card displaying a single review item that requires manual human verification.
  * Shows priority badge, optional detail thumb, issue description, and suggested action.
  */
-export function ReviewItemCard({ item, index, projectId }: ReviewItemCardProps) {
+export function ReviewItemCard({ item, index, projectId, detailSlot }: ReviewItemCardProps) {
   const priority = getPriorityStyle(item.priority)
-  const showDetailThumb = projectId && item.priority === 'high'
+  const showDetailThumb = projectId && item.priority === 'high' && detailSlot != null && detailSlot >= 1 && detailSlot <= 4
 
   return (
     <div className="card p-4 space-y-3">
@@ -36,7 +38,7 @@ export function ReviewItemCard({ item, index, projectId }: ReviewItemCardProps) 
       {showDetailThumb && (
         <div className="relative w-full aspect-video max-h-24 rounded border border-border bg-surface-raised overflow-hidden">
           <Image
-            src={getCaseAssetUrl(projectId!, `detail-${String(index).padStart(2, '0')}.png`)}
+            src={getCaseAssetUrl(projectId!, `detail-${String(detailSlot!).padStart(2, '0')}.png`)}
             alt=""
             fill
             className="object-cover"

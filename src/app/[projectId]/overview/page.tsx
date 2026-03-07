@@ -241,9 +241,21 @@ export default function OverviewPage() {
                 </span>
               </div>
               <div className="space-y-3">
-                {reviewItems.map((item, i) => (
-                  <ReviewItemCard key={item.id} item={item} index={i + 1} projectId={projectId} />
-                ))}
+                {reviewItems.map((item, i) => {
+                  const evidenceIndex = item.relatedEvidenceIds?.length
+                    ? facadeCase.evidence.findIndex((e) => e.id === item.relatedEvidenceIds[0])
+                    : -1
+                  const detailSlot = evidenceIndex >= 0 && evidenceIndex < 4 ? evidenceIndex + 1 : null
+                  return (
+                    <ReviewItemCard
+                      key={item.id}
+                      item={item}
+                      index={i + 1}
+                      projectId={projectId}
+                      detailSlot={detailSlot}
+                    />
+                  )
+                })}
               </div>
             </div>
           )}
