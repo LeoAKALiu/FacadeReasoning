@@ -1,23 +1,29 @@
-import { cn, getPriorityStyle } from '@/lib/utils'
+'use client'
+
+import Image from 'next/image'
+import { cn, getPriorityStyle, getCaseAssetUrl } from '@/lib/utils'
 import type { ReviewItem } from '@/data/types'
 
 interface ReviewItemCardProps {
   item: ReviewItem
   index: number
+  /** When set, high-priority items show a detail thumbnail. */
+  projectId?: string
 }
 
 /**
  * Card displaying a single review item that requires manual human verification.
- * Shows priority badge, issue description, and suggested action.
+ * Shows priority badge, optional detail thumb, issue description, and suggested action.
  */
-export function ReviewItemCard({ item, index }: ReviewItemCardProps) {
+export function ReviewItemCard({ item, index, projectId }: ReviewItemCardProps) {
   const priority = getPriorityStyle(item.priority)
+  const showDetailThumb = projectId && item.priority === 'high'
 
   return (
     <div className="card p-4 space-y-3">
-      {/* Header */}
+      {/* Header + optional detail thumb */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="w-5 h-5 rounded bg-review-subtle border border-review-muted text-review text-2xs font-bold flex items-center justify-center shrink-0">
             {index}
           </span>
@@ -27,6 +33,19 @@ export function ReviewItemCard({ item, index }: ReviewItemCardProps) {
           {priority.label}
         </span>
       </div>
+      {showDetailThumb && (
+        <div className="relative w-full aspect-video max-h-24 rounded border border-border bg-surface-raised overflow-hidden">
+          <Image
+            src={getCaseAssetUrl(projectId!, `detail-${String(index).padStart(2, '0')}.png`)}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="200px"
+            onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}}
+            unoptimized
+          />
+        </div>
+      )}
 
       {item.blocksUsage && (
         <div className="rounded-md border border-review-muted bg-review-subtle px-2.5 py-2 text-xs text-review">

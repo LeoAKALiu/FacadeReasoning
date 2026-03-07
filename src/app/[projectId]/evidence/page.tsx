@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCaseById } from '@/data/index'
-import { ImageViewer } from '@/components/evidence/ImageViewer'
+import { EvidenceImagePanel } from '@/components/evidence/EvidenceImagePanel'
+import { EvidenceDetailStrip } from '@/components/evidence/EvidenceDetailStrip'
 import { EvidenceCard } from '@/components/evidence/EvidenceCard'
 import { SourceBadge } from '@/components/evidence/SourceBadge'
 import type { EvidenceSource, Evidence } from '@/data/types'
@@ -109,10 +110,22 @@ export default function EvidencePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
-          <ImageViewer
+          <EvidenceImagePanel
             images={facadeCase.images}
             evidenceItems={facadeCase.evidence}
             highlightedEvidenceId={highlightedEvidenceId}
+            runScanAnimation
+          />
+          <EvidenceDetailStrip
+            projectId={projectId}
+            slots={facadeCase.evidence.slice(0, 4).map((ev, i) => ({
+              evidenceId: ev.id,
+              imageKey: `detail-${String(i + 1).padStart(2, '0')}.png`,
+              caption: ev.label,
+            }))}
+            highlightedEvidenceId={highlightedEvidenceId}
+            onSlotHover={setHoveredEvidenceId}
+            className="mt-4"
           />
 
           {/* Case info card */}

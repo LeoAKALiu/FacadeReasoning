@@ -124,6 +124,7 @@ export default function MappingPage() {
                     const found = facadeCase.parameterMappings.find((x) => x.id === id) ?? null
                     setSelectedMapping(selectedMapping?.id === id ? null : found)
                   }}
+                  projectId={projectId}
                 />
               ))}
             </div>

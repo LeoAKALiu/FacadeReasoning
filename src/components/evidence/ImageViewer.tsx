@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { getSourceHex } from '@/lib/utils'
 import type { CaseImages, Evidence } from '@/data/types'
@@ -27,9 +28,16 @@ const MODE_DESC: Record<ImageMode, string> = {
   corrected: '几何校正 + 色彩标准化后的图像',
 }
 
+const MODE_TO_URL_KEY: Record<ImageMode, keyof CaseImages> = {
+  original: 'original',
+  evidence: 'evidence',
+  corrected: 'corrected',
+}
+
 /**
  * Three-mode image viewer: original / evidence overlay / corrected.
- * Shows evidence region boxes when in evidence mode.
+ * Uses real asset URLs when available; fallback to inline placeholder on error.
+ * Mode switch uses crossfade (200–300ms).
  */
 export function ImageViewer({
   images,
@@ -38,6 +46,11 @@ export function ImageViewer({
   className,
 }: ImageViewerProps) {
   const [mode, setMode] = useState<ImageMode>('original')
+  const [imageError, setImageError] = useState<Record<ImageMode, boolean>>({
+    original: false,
+    evidence: false,
+    corrected: false,
+  })
 
   const showOverlay = mode === 'evidence'
   const evidenceWithRegions = evidenceItems.filter((e) => e.region)
@@ -45,6 +58,13 @@ export function ImageViewer({
     ? evidenceItems.find((e) => e.id === highlightedEvidenceId)
     : null
   const highlightColor = highlightedEv ? getSourceHex(highlightedEv.source) : null
+
+  const url = images[MODE_TO_URL_KEY[mode]]
+  const showPlaceholder = !url || imageError[mode]
+
+  const handleError = useCallback((m: ImageMode) => {
+    setImageError((prev) => ({ ...prev, [m]: true }))
+  }, [])
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>
@@ -68,16 +88,33 @@ export function ImageViewer({
 
       <p className="text-xs text-ink-tertiary">{MODE_DESC[mode]}</p>
 
-      {/* Image area */}
+      {/* Image area: real image with crossfade or placeholder */}
       <div className="relative aspect-[4/3] bg-surface rounded-lg overflow-hidden border border-border transition-all duration-200">
+        {/* Background / placeholder layer */}
         <div
           className={cn(
-            'absolute inset-0 flex items-center justify-center',
+            'absolute inset-0 flex items-center justify-center transition-opacity duration-300',
             'bg-gradient-to-br from-surface-raised via-surface to-surface-overlay',
+            showPlaceholder ? 'opacity-100' : 'opacity-0',
           )}
         >
           <FacadePlaceholder mode={mode} />
         </div>
+
+        {/* Real image layer — crossfade via opacity */}
+        {url && !imageError[mode] && (
+          <div className="absolute inset-0 transition-opacity duration-300 opacity-100">
+            <Image
+              src={url}
+              alt={MODE_LABELS[mode]}
+              fill
+              className="object-contain"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              onError={() => handleError(mode)}
+              unoptimized
+            />
+          </div>
+        )}
 
         {/* All evidence regions (dim when one is highlighted) */}
         {showOverlay &&

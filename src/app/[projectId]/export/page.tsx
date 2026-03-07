@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCaseById } from '@/data/index'
 import { ReportCanvas } from '@/components/export/ReportCanvas'
+import { ExportArtifactShelf } from '@/components/export/ExportArtifactShelf'
 import { ParameterImportanceBadge } from '@/components/shared/ParameterImportanceBadge'
 import { UsageRecommendationCard } from '@/components/shared/UsageRecommendationCard'
 import { SystemEvolutionRoadmap } from '@/components/shared/SystemEvolutionRoadmap'
@@ -134,6 +135,13 @@ export default function ExportPage() {
             </div>
           )}
 
+          <ExportArtifactShelf
+            projectId={projectId}
+            onExportPdf={handlePrint}
+            onExportPng={handlePrint}
+            className="card p-4"
+          />
+
           {/* Export buttons */}
           <div className="card p-4 space-y-2">
             <h2 className="label-xs mb-3">导出操作</h2>
@@ -202,7 +210,7 @@ export default function ExportPage() {
             </div>
           </div>
 
-          <SystemEvolutionRoadmap evolution={facadeCase.overview.evolution} />
+          <SystemEvolutionRoadmap evolution={facadeCase.overview.evolution} projectId={projectId} />
         </div>
 
         {/* Report preview */}

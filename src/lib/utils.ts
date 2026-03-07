@@ -200,3 +200,18 @@ export function getStepIndex(segment: string): number {
   const idx = steps.indexOf(segment)
   return idx === -1 ? 0 : idx + 1
 }
+
+/**
+ * Builds asset URL for a case (e.g. facade image, detail crop).
+ * Use for consistent paths; missing files fall back to inline placeholders in components.
+ */
+export function getCaseAssetUrl(projectId: string, filename: string): string {
+  return `/assets/cases/${projectId}/${filename}`
+}
+
+/** Returns detail image filenames for EvidenceDetailStrip (detail-01 … detail-N). */
+export function getCaseDetailUrls(projectId: string, count: number = 4): string[] {
+  return Array.from({ length: count }, (_, i) =>
+    getCaseAssetUrl(projectId, `detail-${String(i + 1).padStart(2, '0')}.png`),
+  )
+}

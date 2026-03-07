@@ -139,7 +139,7 @@ export default function OverviewPage() {
             />
           </div>
 
-          <FutureOutputPreview futureOutputs={overview.futureOutputs} />
+          <FutureOutputPreview futureOutputs={overview.futureOutputs} projectId={projectId} />
         </div>
 
         {/* Right column: review items + source legend */}
@@ -154,11 +154,21 @@ export default function OverviewPage() {
                 ['critical', groupedByImportance.critical],
                 ['important', groupedByImportance.important],
                 ['detail', groupedByImportance.detail],
-              ] as const).map(([level, items]) => (
+              ] as const).map(([level, items]) => {
+                const total = groupedByImportance.critical.length + groupedByImportance.important.length + groupedByImportance.detail.length
+                const pct = total > 0 ? Math.min(100, (items.length / total) * 100) : 0
+                const barColor = level === 'critical' ? '#EF4444' : level === 'important' ? '#3B82F6' : '#64748B'
+                return (
                 <div key={level}>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2 gap-2">
                     <ParameterImportanceBadge level={level} />
-                    <span className="text-2xs text-ink-tertiary">{items.length} 项</span>
+                    <div className="flex-1 h-1 rounded-full overflow-hidden bg-surface-overlay min-w-[60px]">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${pct}%`, backgroundColor: barColor }}
+                      />
+                    </div>
+                    <span className="text-2xs text-ink-tertiary shrink-0">{items.length} 项</span>
                   </div>
                   <div className="space-y-2">
                     {items.slice(0, 4).map((parameter) => (
@@ -174,7 +184,8 @@ export default function OverviewPage() {
                     )}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -218,7 +229,7 @@ export default function OverviewPage() {
             </div>
           </div>
 
-          <SystemEvolutionRoadmap evolution={overview.evolution} />
+          <SystemEvolutionRoadmap evolution={overview.evolution} projectId={projectId} />
 
           {/* Review items */}
           {reviewItems.length > 0 && (
@@ -231,7 +242,7 @@ export default function OverviewPage() {
               </div>
               <div className="space-y-3">
                 {reviewItems.map((item, i) => (
-                  <ReviewItemCard key={item.id} item={item} index={i + 1} />
+                  <ReviewItemCard key={item.id} item={item} index={i + 1} projectId={projectId} />
                 ))}
               </div>
             </div>

@@ -72,29 +72,78 @@ export default function ReasoningPage() {
           scenarios={facadeCase.scenarios}
           selectedId={activeScenario}
           onSelect={setActiveScenario}
+          projectId={projectId}
         />
         {scenario.engineeringImpact && (
-          <div className="card p-4 mt-4">
+          <div className="card p-4 mt-4 transition-opacity duration-200" key={activeScenario}>
             <p className="label-xs mb-2">方案对后续工程表达的影响</p>
             <p className="text-sm text-ink-primary mb-3">
               {scenario.engineeringImpact.downstreamDifferenceSummary}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div>
-                <p className="text-ink-secondary mb-1">对结构草图的影响</p>
-                <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.structureSketchImpact}</p>
+              <div className="flex gap-2">
+                <div className="w-8 h-8 rounded border border-border bg-surface-raised flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M3 9h18M9 21V9" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-ink-secondary mb-1">对结构草图的影响</p>
+                  <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.structureSketchImpact}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-ink-secondary mb-1">对参数表的影响</p>
-                <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.parameterTableImpact}</p>
+              <div className="flex gap-2">
+                <div className="w-8 h-8 rounded border border-border bg-surface-raised flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="4" rx="1" />
+                    <rect x="3" y="10" width="18" height="4" rx="1" />
+                    <rect x="3" y="17" width="18" height="4" rx="1" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-ink-secondary mb-1">对参数表的影响</p>
+                  <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.parameterTableImpact}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-ink-secondary mb-1">对人工复核压力的影响</p>
-                <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.reviewBurden}</p>
+              <div className="flex gap-2">
+                <div className="w-8 h-8 rounded border border-border bg-surface-raised flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M9 11l3 3L22 4" />
+                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-ink-secondary mb-1">对人工复核压力的影响</p>
+                  <p className="text-ink-tertiary leading-relaxed">{scenario.engineeringImpact.reviewBurden}</p>
+                </div>
               </div>
             </div>
           </div>
         )}
+        {/* Candidate comparison bar */}
+        <div className="card p-4 mt-4">
+          <p className="label-xs mb-3">方案对比</p>
+          <div className="space-y-2 text-xs">
+            {[
+              { label: '保守程度', value: activeScenario === 'A' ? 90 : activeScenario === 'B' ? 55 : 25 },
+              { label: '活化程度', value: activeScenario === 'A' ? 20 : activeScenario === 'B' ? 50 : 75 },
+              { label: 'AI 补全依赖', value: activeScenario === 'A' ? 15 : activeScenario === 'B' ? 40 : 60 },
+              { label: '复核压力', value: activeScenario === 'A' ? 10 : activeScenario === 'B' ? 35 : 50 },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3">
+                <span className="text-ink-tertiary w-24 shrink-0">{item.label}</span>
+                <div className="flex-1 h-1.5 rounded-full bg-surface-overlay overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-accent/80 transition-all duration-300"
+                    style={{ width: `${item.value}%` }}
+                  />
+                </div>
+                <span className="mono text-2xs text-ink-tertiary w-8">{item.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Stats for current scenario */}

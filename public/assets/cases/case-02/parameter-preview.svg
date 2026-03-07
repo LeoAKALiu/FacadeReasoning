@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 120" fill="none">
+  <rect x="10" y="10" width="240" height="100" rx="4" stroke="#57534E" stroke-width="1" />
+  <line x1="10" y1="35" x2="250" y2="35" stroke="#44403C" stroke-width="1" />
+  <line x1="80" y1="10" x2="80" y2="110" stroke="#44403C" stroke-width="0.5" />
+  <line x1="150" y1="10" x2="150" y2="110" stroke="#44403C" stroke-width="0.5" />
+  <text x="20" y="52" fill="#E2E8F0" font-size="8" font-family="monospace">S!p</text>
+  <text x="90" y="52" fill="#D6D3D1" font-size="8" font-family="monospace">370mm</text>
+  <text x="20" y="72" fill="#E2E8F0" font-size="8" font-family="monospace">ñØ</text>
+  <text x="90" y="72" fill="#D6D3D1" font-size="8" font-family="monospace">2.1m</text>
+  <text x="20" y="92" fill="#E2E8F0" font-size="8" font-family="monospace">Ý¤I§</text>
+  <text x="90" y="92" fill="#F59E0B" font-size="8" font-family="monospace">…8</text>
+</svg>

@@ -68,6 +68,7 @@ const config: Config = {
         'fade-in': 'fadeIn 0.2s ease-out',
         'slide-in-right': 'slideInRight 0.25s ease-out',
         'slide-up': 'slideUp 0.2s ease-out',
+        'scan-sweep': 'scanSweep 1.2s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
@@ -81,6 +82,11 @@ const config: Config = {
         slideUp: {
           '0%': { transform: 'translateY(8px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        scanSweep: {
+          '0%': { transform: 'translateY(-100%)', opacity: '0.4' },
+          '50%': { opacity: '0.15' },
+          '100%': { transform: 'translateY(100%)', opacity: '0' },
         },
       },
       backgroundImage: {

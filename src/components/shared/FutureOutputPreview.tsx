@@ -2,9 +2,12 @@ import type { FutureOutputs } from '@/data/types'
 import { StructuralSketchMock } from './StructuralSketchMock'
 import { StructuralParameterTablePreview } from './StructuralParameterTablePreview'
 import { ComponentCandidatePreview } from './ComponentCandidatePreview'
+import { FutureOutputGallery } from './FutureOutputGallery'
 
 interface FutureOutputPreviewProps {
   futureOutputs?: FutureOutputs
+  /** When set, shows asset-based gallery (structure sketch, param table, component candidates). */
+  projectId?: string
 }
 
 /**
@@ -12,6 +15,7 @@ interface FutureOutputPreviewProps {
  */
 export function FutureOutputPreview({
   futureOutputs,
+  projectId,
 }: FutureOutputPreviewProps) {
   if (!futureOutputs) return null
 
@@ -23,6 +27,14 @@ export function FutureOutputPreview({
           当前参数结果将进一步形成的工程表达成果
         </h3>
       </div>
+
+      {projectId && (
+        <FutureOutputGallery
+          projectId={projectId}
+          includeComponentCandidates
+          className="mb-4"
+        />
+      )}
 
       <StructuralSketchMock preview={futureOutputs.structuralSketchPreview} />
       <StructuralParameterTablePreview rows={futureOutputs.structuralParameterTable} />

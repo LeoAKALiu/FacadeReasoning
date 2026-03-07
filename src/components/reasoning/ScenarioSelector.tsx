@@ -3,21 +3,24 @@
 import { cn } from '@/lib/utils'
 import type { Scenario } from '@/data/types'
 import { getRecommendedUsageMeta } from '@/lib/utils'
+import { PlanPreviewCard } from '@/components/reasoning/PlanPreviewCard'
 
 interface ScenarioSelectorProps {
   scenarios: Scenario[]
   selectedId: 'A' | 'B' | 'C'
   onSelect: (id: 'A' | 'B' | 'C') => void
+  projectId?: string
 }
 
 /**
  * Horizontal tab group for switching between candidate design interpretations A / B / C.
- * Shows a brief divergence note below each label.
+ * Shows plan preview thumbnail and brief divergence note per scenario.
  */
 export function ScenarioSelector({
   scenarios,
   selectedId,
   onSelect,
+  projectId,
 }: ScenarioSelectorProps) {
   return (
     <div className="space-y-3">
@@ -33,12 +36,22 @@ export function ScenarioSelector({
               key={s.id}
               onClick={() => onSelect(s.id)}
               className={cn(
-                'flex-1 text-left p-4 rounded-lg border transition-all',
+                'flex-1 text-left p-4 rounded-lg border transition-all flex flex-col',
                 isActive
                   ? 'border-accent bg-accent-subtle shadow-md shadow-accent/10'
                   : 'border-border bg-surface hover:border-border-strong hover:bg-surface-raised',
               )}
             >
+              {projectId && (
+                <div className="mb-3">
+                  <PlanPreviewCard
+                    projectId={projectId}
+                    scenarioId={s.id}
+                    label={`方案 ${s.id}`}
+                    className="w-full"
+                  />
+                </div>
+              )}
               <div className="flex items-center gap-2 mb-1.5">
                 <span
                   className={cn(

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <rect x="30" y="25" width="40" height="50" rx="2" stroke="#3B82F6" stroke-width="1" />
+  <rect x="80" y="25" width="40" height="50" rx="2" stroke="#3B82F6" stroke-width="1" />
+  <rect x="130" y="25" width="40" height="50" rx="2" stroke="#3B82F6" stroke-width="1" />
+  <text x="38" y="55" fill="#93C5FD" font-size="7" font-family="system-ui,sans-serif">U™UC</text>
+  <text x="88" y="55" fill="#93C5FD" font-size="7" font-family="system-ui,sans-serif">‹P</text>
+  <text x="138" y="55" fill="#93C5FD" font-size="7" font-family="system-ui,sans-serif">‚¹</text>
+  <text x="30" y="92" fill="#94A3B8" font-size="8" font-family="system-ui,sans-serif">„ö	</text>
+</svg>

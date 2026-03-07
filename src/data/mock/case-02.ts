@@ -82,13 +82,13 @@ export const case02: FacadeCase = enrichFacadeCase({
   buildingYear: '1930–1935（原建）/ 2021（修缮）',
   floors: 3,
   createdAt: '2026-03-05T14:20:00Z',
-  thumbnailUrl: '/images/case02-thumb.jpg',
+  thumbnailUrl: '/assets/cases/case-02/facade-original.jpg',
   summary:
     '民国石库门里弄住宅，青砖砌体外墙，装饰线脚丰富，部分构件老化脱落，修缮前外立面调研记录。AI 补全比例较高。',
   images: {
-    original: '/images/case02-original.jpg',
-    evidence: '/images/case02-evidence.jpg',
-    corrected: '/images/case02-corrected.jpg',
+    original: '/assets/cases/case-02/facade-original.jpg',
+    evidence: '/assets/cases/case-02/facade-annotated.png',
+    corrected: '/assets/cases/case-02/facade-rectified.png',
   },
 
   evidence: [

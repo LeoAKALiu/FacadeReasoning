@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <polygon points="45,50 72,30 99,50 72,70" stroke="#6366F1" stroke-width="1" fill="none" />
+  <polygon points="101,50 128,30 155,50 128,70" stroke="#6366F1" stroke-width="1" fill="none" />
+  <polygon points="73,72 100,52 127,72 100,92" stroke="#818CF8" stroke-width="0.8" fill="none" />
+  <text x="60" y="92" fill="#94A3B8" font-size="8" font-family="system-ui,sans-serif">UC	</text>
+</svg>

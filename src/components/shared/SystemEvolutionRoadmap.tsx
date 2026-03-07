@@ -1,14 +1,24 @@
+'use client'
+
+import Image from 'next/image'
 import type { EvolutionPath } from '@/data/types'
+import { getCaseAssetUrl } from '@/lib/utils'
 
 interface SystemEvolutionRoadmapProps {
   evolution?: EvolutionPath
+  /** When set, each stage shows a small thumbnail (evidence UI, sketch, report). */
+  projectId?: string
 }
+
+const STAGE_THUMB_KEYS = ['parameter-preview.svg', 'structure-sketch.svg', 'parameter-preview.svg'] as const
 
 /**
  * Shows the product evolution path from current demo to future delivery system.
+ * Optional: stage thumbnails when projectId is provided.
  */
 export function SystemEvolutionRoadmap({
   evolution,
+  projectId,
 }: SystemEvolutionRoadmapProps) {
   if (!evolution) return null
 
@@ -28,6 +38,18 @@ export function SystemEvolutionRoadmap({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {stages.map((stage, index) => (
           <div key={stage.title} className="rounded-lg border border-border bg-surface-raised p-4">
+            {projectId && (
+              <div className="relative aspect-video w-full rounded border border-border bg-surface mb-3 overflow-hidden">
+                <Image
+                  src={getCaseAssetUrl(projectId, STAGE_THUMB_KEYS[index])}
+                  alt=""
+                  fill
+                  className="object-contain p-2"
+                  sizes="140px"
+                  unoptimized
+                />
+              </div>
+            )}
             <div className="flex items-center gap-2 mb-2">
               <span className="w-6 h-6 rounded-md bg-accent-subtle border border-accent-muted text-accent text-xs font-bold flex items-center justify-center">
                 {index + 1}

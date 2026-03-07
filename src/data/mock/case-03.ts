@@ -71,13 +71,13 @@ export const case03: FacadeCase = enrichFacadeCase({
   buildingYear: '2023',
   floors: 6,
   createdAt: '2026-03-05T16:45:00Z',
-  thumbnailUrl: '/images/case03-thumb.jpg',
+  thumbnailUrl: '/assets/cases/case-03/facade-original.jpg',
   summary:
     '双曲面铝板参数化幕墙，菱形分格体系，板块旋转角度存在梯度变化，板缝规律性强但角度解析存在多解。方案 A/B/C 分歧在于板块旋转逻辑的推断。',
   images: {
-    original: '/images/case03-original.jpg',
-    evidence: '/images/case03-evidence.jpg',
-    corrected: '/images/case03-corrected.jpg',
+    original: '/assets/cases/case-03/facade-original.jpg',
+    evidence: '/assets/cases/case-03/facade-annotated.png',
+    corrected: '/assets/cases/case-03/facade-rectified.png',
   },
 
   evidence: [

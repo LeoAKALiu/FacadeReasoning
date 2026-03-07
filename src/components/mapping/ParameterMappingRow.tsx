@@ -4,22 +4,27 @@ import { cn } from '@/lib/utils'
 import type { ParameterMapping } from '@/data/types'
 import { ReliabilityDot } from '@/components/overview/ReliabilityDot'
 import { ParameterImportanceBadge } from '@/components/shared/ParameterImportanceBadge'
+import { MappingVisualHint } from '@/components/mapping/MappingVisualHint'
 
 interface ParameterMappingRowProps {
   mapping: ParameterMapping
   isSelected?: boolean
   onSelect?: (id: string) => void
+  projectId?: string
 }
 
 /**
  * A single row in the parameter mapping table.
- * Shows: effective parameter → design parameter, confidence, category tag.
+ * Shows: evidence thumb → effective parameter → design parameter, confidence, category tag.
  */
 export function ParameterMappingRow({
   mapping,
   isSelected,
   onSelect,
+  projectId,
 }: ParameterMappingRowProps) {
+  const isCritical = mapping.importanceLevel === 'critical'
+
   return (
     <div
       className={cn(
@@ -27,9 +32,18 @@ export function ParameterMappingRow({
         isSelected
           ? 'border-accent bg-accent-subtle'
           : 'border-border bg-surface hover:border-border-strong hover:bg-surface-raised',
+        isCritical && 'border-l-4 border-l-red-500/70',
       )}
       onClick={() => onSelect?.(mapping.id)}
     >
+      {projectId && (
+        <div className="shrink-0 hidden sm:block">
+          <MappingVisualHint
+            projectId={projectId}
+            paramLabel={mapping.designParam.label}
+          />
+        </div>
+      )}
       {/* Left: effective parameter */}
       <div className="flex-1 min-w-0">
         <p className="text-2xs text-ink-tertiary mb-0.5 uppercase tracking-wider">有效参数</p>

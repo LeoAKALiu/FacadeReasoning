@@ -59,6 +59,19 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
 
       {/* Body */}
       <div className="p-8 space-y-6">
+        {/* Project main image */}
+        <section>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2 font-medium">项目主图</p>
+          <div className="relative w-full aspect-video max-h-48 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={facadeCase.images.original}
+              alt={facadeCase.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </section>
+
         {/* Summary */}
         <section>
           <p className="text-xs text-gray-500 uppercase tracking-wider mb-2 font-medium">立面概述</p>

@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { allCases } from '@/data/index'
 import { reliabilityToColor, formatReliability } from '@/lib/utils'
 import type { FacadeCase } from '@/data/types'
+import { CaseCardImage } from '@/components/home/CaseCardImage'
+import { FlowBandReveal } from '@/components/home/FlowBandReveal'
+import { CaseHeroPreview } from '@/components/home/CaseHeroPreview'
 
 const DEMO_VALUE: Record<string, string> = {
   'case-01': '立面模数清晰，适合展示高可靠度推断。',
@@ -73,9 +76,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Flow band: 输入 → 推理 → 输出 */}
+      {/* Flow band: 输入 → 推理 → 输出 (scroll reveal) */}
       <section className="px-6 pb-16 max-w-5xl mx-auto">
-        <div className="flex flex-col sm:flex-row items-stretch gap-0 sm:gap-2">
+        <FlowBandReveal>
           {/* Step 1: 有效参数提取 */}
           <div className="card p-4 flex-1 min-w-0">
             <div className="w-8 h-8 rounded-md bg-accent-subtle border border-accent-muted flex items-center justify-center mb-3">
@@ -130,8 +133,11 @@ export default function HomePage() {
             <h3 className="text-sm font-semibold text-ink-primary mb-1">结构化输出</h3>
             <p className="text-xs text-ink-tertiary leading-relaxed">带可靠度的树形结果与待复核清单，可追溯可解释</p>
           </div>
-        </div>
+        </FlowBandReveal>
       </section>
+
+      {/* System preview carousel */}
+      <CaseHeroPreview />
 
       {/* Status legend — compact single line */}
       <section className="px-6 pb-12 max-w-5xl mx-auto">
@@ -181,10 +187,10 @@ export default function HomePage() {
               <Link
                 key={c.id}
                 href={`/${c.id}/evidence`}
-                className="card group hover:border-accent transition-all hover:shadow-lg hover:shadow-accent/10 overflow-hidden"
+                className="card group hover:border-accent transition-all hover:shadow-lg hover:shadow-accent/10 overflow-hidden hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="h-44 bg-gradient-to-br from-surface-raised via-surface to-surface-overlay flex items-center justify-center relative overflow-hidden">
-                  <FacadeThumbnail type={c.id} />
+                <div className="aspect-video max-h-44 bg-surface-raised flex items-center justify-center relative overflow-hidden">
+                  <CaseCardImage src={c.thumbnailUrl} alt={c.name} caseId={c.id} className="absolute inset-0" />
                   <div className="absolute inset-0 bg-accent/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="bg-accent text-white text-xs font-medium px-3 py-1.5 rounded-md">
                       进入推理流程 →
@@ -236,85 +242,5 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-  )
-}
-
-/** Unique SVG placeholder per case */
-function FacadeThumbnail({ type }: { type: string }) {
-  if (type === 'case-01') {
-    // Modern glass curtain wall
-    return (
-      <svg width="160" height="130" viewBox="0 0 160 130" fill="none" className="opacity-70">
-        <rect x="10" y="5" width="140" height="120" rx="2" stroke="#374151" strokeWidth="1" />
-        {[0, 1, 2, 3, 4].map((col) =>
-          [0, 1, 2, 3, 4, 5].map((row) => (
-            <rect
-              key={`${col}-${row}`}
-              x={12 + col * 27}
-              y={7 + row * 19}
-              width={22}
-              height={16}
-              rx="1"
-              fill="#1E3A8A"
-              stroke="#3B82F6"
-              strokeWidth="0.5"
-              opacity={0.6 + Math.random() * 0.4}
-            />
-          )),
-        )}
-        <rect x="10" y="5" width="140" height="14" rx="2" fill="#1F2937" />
-        <text x="80" y="13.5" fill="#6B7280" fontSize="5" textAnchor="middle" fontFamily="monospace">GLASS CURTAIN WALL</text>
-      </svg>
-    )
-  }
-
-  if (type === 'case-02') {
-    // Historic masonry
-    return (
-      <svg width="160" height="130" viewBox="0 0 160 130" fill="none" className="opacity-70">
-        <rect x="10" y="5" width="140" height="120" rx="1" stroke="#374151" strokeWidth="1" fill="#1a1a16" />
-        {[0, 1, 2, 3, 4, 5].map((row) =>
-          [0, 1, 2, 3, 4, 5, 6, 7].map((col) => (
-            <rect
-              key={`${col}-${row}`}
-              x={12 + col * 17 + (row % 2 === 0 ? 0 : 8.5)}
-              y={8 + row * 18}
-              width={14}
-              height={12}
-              rx="0.5"
-              fill="#2d2d26"
-              stroke="#4a4a3a"
-              strokeWidth="0.5"
-            />
-          )),
-        )}
-        {/* Arched entrance */}
-        <path d="M60 90 Q80 70 100 90 L100 125 L60 125 Z" fill="#111" stroke="#4a4a3a" strokeWidth="1" />
-        <path d="M62 90 Q80 72 98 90" stroke="#6B7280" strokeWidth="1" fill="none" />
-      </svg>
-    )
-  }
-
-  // case-03: parametric diamond
-  return (
-    <svg width="160" height="130" viewBox="0 0 160 130" fill="none" className="opacity-70">
-      <rect x="5" y="5" width="150" height="120" rx="2" stroke="#374151" strokeWidth="1" fill="#0d1117" />
-      {[0, 1, 2, 3, 4, 5, 6].map((col) =>
-        [0, 1, 2, 3, 4, 5, 6].map((row) => {
-          const x = 12 + col * 21 + (row % 2 === 0 ? 0 : 10.5)
-          const y = 10 + row * 18
-          return (
-            <polygon
-              key={`${col}-${row}`}
-              points={`${x + 9},${y} ${x + 18},${y + 9} ${x + 9},${y + 18} ${x},${y + 9}`}
-              fill="#1a1f2e"
-              stroke="#4B5563"
-              strokeWidth="0.5"
-              opacity={0.5 + (col + row) * 0.05}
-            />
-          )
-        }),
-      )}
-    </svg>
   )
 }
