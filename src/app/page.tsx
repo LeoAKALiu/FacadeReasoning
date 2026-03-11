@@ -56,9 +56,6 @@ export default function HomePage() {
           <p className="text-ink-secondary text-lg max-w-2xl mx-auto leading-relaxed mb-8">
             自动提取立面证据，推断设计参数，补全缺失信息，并输出带可靠度标识的结构结果。
           </p>
-          <p className="text-xs text-ink-tertiary max-w-2xl mx-auto mb-8">
-            当前演示聚焦证据提取、参数映射与推理补全，未来将进一步生成带可靠度标识的结构表达结果。
-          </p>
 
           <div className="flex flex-col items-center gap-3">
             <div className="flex items-center justify-center gap-4">
@@ -88,7 +85,7 @@ export default function HomePage() {
               </svg>
             </div>
             <h3 className="text-sm font-semibold text-ink-primary mb-1">有效参数提取</h3>
-            <p className="text-xs text-ink-tertiary leading-relaxed">从图像提取视觉证据，标注区域依据</p>
+            <p className="text-xs text-ink-tertiary leading-relaxed">从图像提取证据</p>
           </div>
           <div className="hidden sm:flex items-center shrink-0 text-ink-tertiary py-4">
             <span className="text-lg">→</span>
@@ -101,7 +98,7 @@ export default function HomePage() {
               </svg>
             </div>
             <h3 className="text-sm font-semibold text-ink-primary mb-1">参数映射</h3>
-            <p className="text-xs text-ink-tertiary leading-relaxed">证据 → 设计参数的可解释映射链</p>
+            <p className="text-xs text-ink-tertiary leading-relaxed">证据 → 设计参数</p>
           </div>
           <div className="hidden sm:flex items-center shrink-0 text-ink-tertiary py-4">
             <span className="text-lg">→</span>
@@ -115,7 +112,7 @@ export default function HomePage() {
               </svg>
             </div>
             <h3 className="text-sm font-semibold text-ink-primary mb-1">约束推理补全</h3>
-            <p className="text-xs text-ink-tertiary leading-relaxed">规范约束 + AI 缺省值，生成多套候选方案，非单纯识图</p>
+            <p className="text-xs text-ink-tertiary leading-relaxed">约束 + AI 补全，多方案</p>
           </div>
           <div className="hidden sm:flex items-center shrink-0 text-ink-tertiary py-4">
             <span className="text-lg">→</span>
@@ -131,7 +128,7 @@ export default function HomePage() {
               </svg>
             </div>
             <h3 className="text-sm font-semibold text-ink-primary mb-1">结构化输出</h3>
-            <p className="text-xs text-ink-tertiary leading-relaxed">带可靠度的树形结果与待复核清单，可追溯可解释</p>
+            <p className="text-xs text-ink-tertiary leading-relaxed">带可靠度的结果与待复核</p>
           </div>
         </FlowBandReveal>
       </section>
@@ -139,40 +136,22 @@ export default function HomePage() {
       {/* System preview carousel */}
       <CaseHeroPreview />
 
-      {/* Status legend — compact single line */}
+      {/* Status legend — minimal */}
       <section className="px-6 pb-12 max-w-5xl mx-auto">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-tertiary border border-border rounded-lg px-4 py-2.5 bg-surface/50">
-          <span className="text-ink-secondary font-medium shrink-0">参数来源：</span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-observe" />
-            <span>直接观测</span>
-            <span className="opacity-75">图像直接测量或识别</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-infer" />
-            <span>规则推断</span>
-            <span className="opacity-75">规范/类型学推导</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-ai" />
-            <span>AI 补全</span>
-            <span className="opacity-75">证据不足时缺省填充</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-review" />
-            <span>待复核</span>
-            <span className="opacity-75">需人工验证</span>
-          </span>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-2xs text-ink-tertiary border border-border rounded-lg px-3 py-2 bg-surface/50">
+          <span className="text-ink-secondary font-medium shrink-0">参数来源</span>
+          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-observe" />直接观测</span>
+          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-infer" />规则推断</span>
+          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-ai" />AI 补全</span>
+          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-review" />待复核</span>
         </div>
       </section>
 
       {/* Demo cases */}
       <section className="px-6 pb-20 max-w-5xl mx-auto">
         <h2 className="section-heading mb-2">演示案例</h2>
-        <p className="text-sm text-ink-tertiary mb-6">
-          选择以下任意案例进入完整推理流程，或{' '}
-          <Link href="/project/new" className="text-accent hover:underline">上传自己的图像</Link>
-          {' '}创建新项目。
+        <p className="text-xs text-ink-tertiary mb-4">
+          选案例进入推理流程，或 <Link href="/project/new" className="text-accent hover:underline">上传图像</Link> 创建新项目。
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -198,13 +177,10 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="p-4 space-y-3">
+                <div className="p-4 space-y-2">
                   <h3 className="text-base font-semibold text-ink-primary leading-tight">{c.name}</h3>
-                  <p className="text-xs text-ink-tertiary">{c.buildingType}</p>
-                  <p className="text-xs text-ink-secondary leading-relaxed">
-                    {demoValue}
-                  </p>
-                  <p className="text-2xs text-ink-tertiary">{c.location}</p>
+                  <p className="text-xs text-ink-secondary leading-snug">{demoValue}</p>
+                  <p className="text-2xs text-ink-tertiary">{c.buildingType}{c.location ? ` · ${c.location}` : ''}</p>
 
                   <div className="divider" />
 

@@ -20,6 +20,11 @@ export default function ExportPage() {
   const facadeCase = getCaseById(projectId)
   const printRef = useRef<HTMLDivElement>(null)
   const [copied, setCopied] = useState(false)
+  const [showKeyParams, setShowKeyParams] = useState(false)
+  const [showMoreReview, setShowMoreReview] = useState(false)
+  const [showScenarioHint, setShowScenarioHint] = useState(false)
+  const [showStepsRecap, setShowStepsRecap] = useState(false)
+  const [showEvolution, setShowEvolution] = useState(false)
 
   if (!facadeCase) {
     return (
@@ -50,11 +55,11 @@ export default function ExportPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-xl font-bold text-ink-primary mb-1">导出与汇报</h1>
-          <p className="text-sm text-ink-secondary">
-            预览一页式汇报图，导出为 PDF 或复制链接分享。汇报包含设计参数表、可靠度统计与待复核清单。
+          <h1 className="text-xl font-bold text-ink-primary">导出与汇报</h1>
+          <p className="text-sm text-ink-secondary mt-1">
+            预览一页式汇报，导出 PDF 或复制链接分享。
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -102,35 +107,56 @@ export default function ExportPage() {
           <UsageRecommendationCard
             usage={facadeCase.overview.recommendedUsage}
             reason={facadeCase.overview.usageReason}
+            compact
           />
 
-          <div className="card p-4">
-            <h2 className="label-xs mb-3">关键参数与重要性</h2>
-            <div className="space-y-3">
-              {criticalParameters.slice(0, 5).map((parameter) => (
-                <div key={parameter.id} className="rounded-md border border-border bg-surface-raised px-3 py-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm text-ink-primary">{parameter.label}</p>
-                    <ParameterImportanceBadge level={parameter.importanceLevel} />
-                  </div>
-                  <p className="mono text-xs text-accent mt-1">
-                    {parameter.value}{parameter.unit ? ` ${parameter.unit}` : ''}
-                  </p>
+          {/* Key params — collapsible */}
+          {criticalParameters.length > 0 && (
+            <div className="border border-border rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowKeyParams((v) => !v)}
+                className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-tertiary"
+              >
+                <span>关键参数与重要性</span>
+                <span>{showKeyParams ? '收起' : '展开'}</span>
+              </button>
+              {showKeyParams && (
+                <div className="p-4 border-t border-border space-y-2">
+                  {criticalParameters.slice(0, 5).map((parameter) => (
+                    <div key={parameter.id} className="rounded border border-border bg-surface-raised px-3 py-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs text-ink-primary">{parameter.label}</p>
+                        <ParameterImportanceBadge level={parameter.importanceLevel} />
+                      </div>
+                      <p className="mono text-2xs text-accent mt-0.5">{parameter.value}{parameter.unit ? ` ${parameter.unit}` : ''}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
+          )}
 
+          {/* High priority review — 1–2 default, rest fold */}
           {highPriorityReviewItems.length > 0 && (
             <div className="card p-4">
-              <h2 className="label-xs mb-3">高优先复核项</h2>
+              <h2 className="label-xs mb-2">高优先复核项</h2>
               <div className="space-y-2">
-                {highPriorityReviewItems.map((item) => (
-                  <div key={item.id} className="rounded-md border border-review-muted bg-review-subtle px-3 py-2">
-                    <p className="text-sm text-review">{item.parameterLabel}</p>
-                    <p className="text-2xs text-ink-tertiary mt-1 leading-relaxed">{item.suggestion}</p>
+                {highPriorityReviewItems.slice(0, showMoreReview ? undefined : 2).map((item) => (
+                  <div key={item.id} className="rounded border border-review-muted bg-review-subtle px-3 py-2">
+                    <p className="text-xs text-review">{item.parameterLabel}</p>
+                    <p className="text-2xs text-ink-tertiary mt-0.5">{item.suggestion}</p>
                   </div>
                 ))}
+                {highPriorityReviewItems.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowMoreReview((v) => !v)}
+                    className="w-full py-1.5 text-2xs text-ink-tertiary hover:text-ink-secondary"
+                  >
+                    {showMoreReview ? '收起' : `更多 (${highPriorityReviewItems.length - 2})`}
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -170,47 +196,71 @@ export default function ExportPage() {
             </button>
           </div>
 
-          {/* Scenario comparison hint */}
-          <div className="card p-4">
-            <h2 className="label-xs mb-2">其他方案对比</h2>
-            <p className="text-xs text-ink-tertiary mb-3 leading-relaxed">
-              当前汇报采用方案 {facadeCase.overview.selectedScenarioId}。
-              可前往推理页切换方案后重新导出。
-            </p>
-            <Link
-              href={`/${projectId}/reasoning`}
-              className="text-xs text-accent hover:underline"
+          {/* Scenario hint — collapsible */}
+          <div className="border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowScenarioHint((v) => !v)}
+              className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-tertiary"
             >
-              → 前往推理页切换方案
-            </Link>
+              <span>其他方案对比</span>
+              <span>{showScenarioHint ? '收起' : '展开'}</span>
+            </button>
+            {showScenarioHint && (
+              <div className="p-3 border-t border-border text-xs text-ink-tertiary">
+                当前采用方案 {facadeCase.overview.selectedScenarioId}。
+                <Link href={`/${projectId}/reasoning`} className="text-accent hover:underline ml-1">前往推理页切换</Link>
+              </div>
+            )}
           </div>
 
-          {/* Steps recap */}
-          <div className="card p-4">
-            <h2 className="label-xs mb-3">推理流程完成情况</h2>
-            <div className="space-y-2">
-              {[
-                { label: '证据提取', count: `${facadeCase.evidence.length} 条`, done: true },
-                { label: '参数映射', count: `${facadeCase.parameterMappings.length} 个`, done: true },
-                { label: '推理补全', count: `方案 A/B/C`, done: true },
-                { label: '结果总览', count: `可靠度 ${formatReliability(facadeCase.overview.overallReliability)}`, done: true },
-              ].map((step) => (
-                <div key={step.label} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-full bg-observe-subtle border border-observe-muted flex items-center justify-center">
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                        <path d="M1.5 4L3.5 6L6.5 2" stroke="#22C55E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+          {/* Steps recap — collapsible */}
+          <div className="border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowStepsRecap((v) => !v)}
+              className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-tertiary"
+            >
+              <span>推理流程完成情况</span>
+              <span>{showStepsRecap ? '收起' : '展开'}</span>
+            </button>
+            {showStepsRecap && (
+              <div className="p-3 border-t border-border space-y-1 text-2xs text-ink-tertiary">
+                {['证据提取', '参数映射', '推理补全', '结果总览'].map((label, i) => (
+                  <div key={label} className="flex justify-between">
+                    <span>{label}</span>
+                    <span>
+                      {i === 0 && `${facadeCase.evidence.length} 条`}
+                      {i === 1 && `${facadeCase.parameterMappings.length} 个`}
+                      {i === 2 && '方案 A/B/C'}
+                      {i === 3 && formatReliability(facadeCase.overview.overallReliability)}
                     </span>
-                    <span className="text-ink-primary">{step.label}</span>
                   </div>
-                  <span className="text-ink-tertiary">{step.count}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <SystemEvolutionRoadmap evolution={facadeCase.overview.evolution} projectId={projectId} />
+          {/* System evolution — collapsible */}
+          <div className="border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowEvolution((v) => !v)}
+              className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-tertiary"
+            >
+              <span>系统演进路径</span>
+              <span>{showEvolution ? '收起' : '展开'}</span>
+            </button>
+            {showEvolution && (
+              <div className="border-t border-border">
+                <SystemEvolutionRoadmap
+                  evolution={facadeCase.overview.evolution}
+                  projectId={projectId}
+                  layout="stacked"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Report preview */}

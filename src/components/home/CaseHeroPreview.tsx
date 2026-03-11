@@ -4,50 +4,47 @@ import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
 const SLIDES = [
-  {
-    title: '证据提取',
-    caption: '从立面图像中提取视觉证据并标注区域依据',
-    icon: 'evidence',
-  },
-  {
-    title: '参数映射',
-    caption: '证据 → 设计参数的可解释映射链',
-    icon: 'mapping',
-  },
-  {
-    title: '推理补全',
-    caption: '约束推理与 AI 缺省补全，生成候选方案',
-    icon: 'reasoning',
-  },
-  {
-    title: '结果总览',
-    caption: '带可靠度标识的结构表达与待复核清单',
-    icon: 'overview',
-  },
+  { title: '证据提取', caption: '从图像提取证据', icon: 'evidence' as const },
+  { title: '参数映射', caption: '证据 → 设计参数', icon: 'mapping' as const },
+  { title: '推理补全', caption: '约束 + AI 补全，多方案', icon: 'reasoning' as const },
+  { title: '结果总览', caption: '带可靠度的结果与待复核', icon: 'overview' as const },
 ]
 
+interface CaseHeroPreviewProps {
+  /** When true, only a single-line toggle is shown by default. */
+  defaultCollapsed?: boolean
+}
+
 /**
- * Lightweight "system preview" carousel for home: evidence → mapping → result flow.
- * Auto-rotates; dark panel, title, caption. No heavy animation.
+ * Lightweight "system preview" carousel for home. Can be collapsed to one line.
  */
-export function CaseHeroPreview() {
+export function CaseHeroPreview({ defaultCollapsed = true }: CaseHeroPreviewProps) {
   const [index, setIndex] = useState(0)
+  const [collapsed, setCollapsed] = useState(defaultCollapsed)
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setIndex((i) => (i + 1) % SLIDES.length)
-    }, 4000)
+    if (collapsed) return
+    const t = setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), 4000)
     return () => clearInterval(t)
-  }, [])
+  }, [collapsed])
 
   return (
     <section className="px-6 pb-12 max-w-5xl mx-auto">
       <div className="rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className="w-full px-4 py-3 border-b border-border flex items-center justify-between text-left hover:bg-surface-raised/50 transition-colors"
+        >
           <h2 className="text-sm font-semibold text-ink-primary">系统预览</h2>
-          <p className="text-2xs text-ink-tertiary mt-0.5">
-            从证据提取到参数映射、推理补全与结果输出的完整流程
-          </p>
+          <span className="text-2xs text-ink-tertiary">
+            {collapsed ? '展开' : '收起'}
+          </span>
+        </button>
+        {!collapsed && (
+        <>
+        <div className="px-4 py-2 border-b border-border">
+          <p className="text-2xs text-ink-tertiary">证据提取 → 参数映射 → 推理补全 → 结果总览</p>
         </div>
         <div className="relative aspect-[2.2/1] bg-surface-raised min-h-[180px]">
           {SLIDES.map((slide, i) => (
@@ -104,6 +101,8 @@ export function CaseHeroPreview() {
             />
           ))}
         </div>
+        </>
+        )}
       </div>
     </section>
   )

@@ -17,6 +17,17 @@ interface ExportArtifactShelfProps {
   className?: string
 }
 
+function getArtifactThumb(projectId: string, thumb: (typeof ARTIFACTS)[number]['thumb']): string {
+  if (thumb === 'structure-sketch') return 'structure-sketch.svg'
+  if (thumb === 'parameter-preview') {
+    return projectId === 'case-01' ? 'parameter-preview.png' : 'parameter-preview.svg'
+  }
+  if (thumb === 'report-preview') {
+    return projectId === 'case-01' ? 'report-preview.png' : 'parameter-preview.svg'
+  }
+  return 'parameter-preview.svg'
+}
+
 /**
  * Shelf of export artifact cards: PDF, PNG, CSV, structure sketch.
  * Each card has a thumbnail and title; actions can be wired to buttons.
@@ -37,34 +48,14 @@ export function ExportArtifactShelf({
             className="card p-3 flex flex-col gap-2 hover:border-border-strong transition-colors"
           >
             <div className="relative aspect-[4/3] rounded border border-border bg-surface-raised overflow-hidden">
-              {a.thumb === 'structure-sketch' ? (
-                <Image
-                  src={getCaseAssetUrl(projectId, 'structure-sketch.svg')}
-                  alt={a.label}
-                  fill
-                  className="object-contain p-2"
-                  sizes="120px"
-                  unoptimized
-                />
-              ) : a.thumb === 'parameter-preview' ? (
-                <Image
-                  src={getCaseAssetUrl(projectId, 'parameter-preview.svg')}
-                  alt={a.label}
-                  fill
-                  className="object-contain p-2"
-                  sizes="120px"
-                  unoptimized
-                />
-              ) : (
-                <Image
-                  src={getCaseAssetUrl(projectId, 'parameter-preview.svg')}
-                  alt={a.label}
-                  fill
-                  className="object-contain p-2 opacity-80"
-                  sizes="120px"
-                  unoptimized
-                />
-              )}
+              <Image
+                src={getCaseAssetUrl(projectId, getArtifactThumb(projectId, a.thumb))}
+                alt={a.label}
+                fill
+                className={a.thumb === 'report-preview' ? 'object-cover' : 'object-contain p-2'}
+                sizes="120px"
+                unoptimized
+              />
             </div>
             <p className="text-xs font-medium text-ink-primary">{a.label}</p>
             {a.id === 'pdf' && onExportPdf && (

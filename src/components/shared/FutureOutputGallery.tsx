@@ -11,6 +11,13 @@ const GALLERY_ITEMS = [
   { key: 'component-candidates.svg', label: '构件候选' },
 ] as const
 
+function getGalleryAssetKey(projectId: string, key: (typeof GALLERY_ITEMS)[number]['key']): string {
+  if (projectId === 'case-01' && key === 'parameter-preview.svg') {
+    return 'parameter-preview.png'
+  }
+  return key
+}
+
 interface FutureOutputGalleryProps {
   projectId: string
   /** Include component-candidates only for cases that have it (e.g. case-02, case-03) */
@@ -69,7 +76,7 @@ export function FutureOutputGallery({
           >
             <div className="relative w-full h-full">
               <Image
-                src={getCaseAssetUrl(projectId, item.key)}
+                src={getCaseAssetUrl(projectId, getGalleryAssetKey(projectId, item.key))}
                 alt={item.label}
                 fill
                 className="object-contain"

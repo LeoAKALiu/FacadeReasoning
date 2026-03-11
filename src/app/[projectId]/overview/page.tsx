@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getCaseById } from '@/data/index'
@@ -22,6 +23,10 @@ export default function OverviewPage() {
   const params = useParams()
   const projectId = params.projectId as string
   const facadeCase = getCaseById(projectId)
+  const [showImportanceDetail, setShowImportanceDetail] = useState(false)
+  const [showMoreReview, setShowMoreReview] = useState(false)
+  const [showLegend, setShowLegend] = useState(false)
+  const [showEvolution, setShowEvolution] = useState(false)
 
   if (!facadeCase) {
     return (
@@ -43,16 +48,17 @@ export default function OverviewPage() {
     important: selectedScenario?.parameters.filter((parameter) => parameter.importanceLevel === 'important') ?? [],
     detail: selectedScenario?.parameters.filter((parameter) => parameter.importanceLevel === 'detail') ?? [],
   }
+  const highPriorityReview = reviewItems.filter((r) => r.priority === 'high')
+  const restReview = reviewItems.filter((r) => r.priority !== 'high')
 
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-xl font-bold text-ink-primary mb-1">带可靠度标识的结构表达结果</h1>
-          <p className="text-sm text-ink-secondary">
-            以层级结构展示最终设计参数认知结果，每项参数附带来源状态与可靠度标识。
-            高亮标注待人工复核的参数。
+          <h1 className="text-xl font-bold text-ink-primary">带可靠度标识的结构表达结果</h1>
+          <p className="text-sm text-ink-secondary mt-1 pl-0.5 border-l-2 border-accent/50 py-0.5 px-3">
+            当前结果已达可引用程度；{highPriorityCount > 0 ? `${highPriorityCount} 项高优先须复核。` : '待复核项已标注。'}
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -109,47 +115,51 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4">
         <UsageRecommendationCard
           usage={overview.recommendedUsage}
           reason={overview.usageReason}
+          compact
         />
       </div>
 
       {/* Main two-column layout */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Structural expression table (2/3 width) */}
         <div className="xl:col-span-2 space-y-6">
-          <EngineeringTranslationFlow bridgeNote="当前结果不会停留在参数树层，而是会继续生成结构草图、结构参数表与构件级表达。" />
-
+          <p className="text-2xs text-ink-tertiary">
+            当前结果将生成结构草图、参数表与构件表达。
+          </p>
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="section-heading">结构表达</h2>
-              <div className="flex items-center gap-3 text-xs text-ink-tertiary">
+              <div className="flex items-center gap-2 text-2xs text-ink-tertiary">
                 <span>可靠度</span>
-                <div className="flex items-center gap-1">
-                  <div className="h-2 w-16 rounded-full" style={{ background: 'linear-gradient(to right, #EF4444, #EAB308, #22C55E)' }} />
-                  <span>低 → 高</span>
-                </div>
+                <div className="h-1.5 w-12 rounded-full" style={{ background: 'linear-gradient(to right, #EF4444, #EAB308, #22C55E)' }} />
               </div>
             </div>
             <StructureExpressionTable
               nodes={overview.structuralNodes}
-              defaultExpanded
+              defaultExpanded={false}
             />
           </div>
 
           <FutureOutputPreview futureOutputs={overview.futureOutputs} projectId={projectId} />
         </div>
 
-        {/* Right column: review items + source legend */}
         <div className="space-y-6">
+          {/* Parameter importance — summary by default, detail fold */}
           <div className="card p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="label-xs">参数重要性分级</h2>
-              <span className="text-2xs text-ink-tertiary">可靠度与重要性分开表达</span>
+              <button
+                type="button"
+                onClick={() => setShowImportanceDetail((v) => !v)}
+                className="text-2xs text-ink-tertiary hover:text-ink-secondary"
+              >
+                {showImportanceDetail ? '收起' : '展开'}
+              </button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {([
                 ['critical', groupedByImportance.critical],
                 ['important', groupedByImportance.important],
@@ -159,106 +169,120 @@ export default function OverviewPage() {
                 const pct = total > 0 ? Math.min(100, (items.length / total) * 100) : 0
                 const barColor = level === 'critical' ? '#EF4444' : level === 'important' ? '#3B82F6' : '#64748B'
                 return (
-                <div key={level}>
-                  <div className="flex items-center justify-between mb-2 gap-2">
-                    <ParameterImportanceBadge level={level} />
-                    <div className="flex-1 h-1 rounded-full overflow-hidden bg-surface-overlay min-w-[60px]">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${pct}%`, backgroundColor: barColor }}
-                      />
-                    </div>
-                    <span className="text-2xs text-ink-tertiary shrink-0">{items.length} 项</span>
-                  </div>
-                  <div className="space-y-2">
-                    {items.slice(0, 4).map((parameter) => (
-                      <div key={parameter.id} className="rounded-md border border-border bg-surface-raised px-3 py-2">
-                        <p className="text-xs text-ink-primary">{parameter.label}</p>
-                        <p className="text-2xs text-ink-tertiary mt-1 leading-relaxed">
-                          {parameter.importanceNote}
-                        </p>
+                  <div key={level}>
+                    <div className="flex items-center justify-between gap-2">
+                      <ParameterImportanceBadge level={level} />
+                      <div className="flex-1 h-1 rounded-full overflow-hidden bg-surface-overlay min-w-[60px]">
+                        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: barColor }} />
                       </div>
-                    ))}
-                    {items.length === 0 && (
-                      <p className="text-2xs text-ink-tertiary">暂无该级别参数</p>
+                      <span className="text-2xs text-ink-tertiary shrink-0">{items.length} 项</span>
+                    </div>
+                    {showImportanceDetail && items.length > 0 && (
+                      <div className="space-y-1.5 mt-2 pl-1">
+                        {items.slice(0, 4).map((parameter) => (
+                          <div key={parameter.id} className="rounded border border-border bg-surface-raised px-2 py-1.5">
+                            <p className="text-2xs text-ink-primary">{parameter.label}</p>
+                            {parameter.importanceNote && <p className="text-2xs text-ink-tertiary mt-0.5">{parameter.importanceNote}</p>}
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                </div>
                 )
               })}
             </div>
           </div>
 
-          {/* Source legend */}
-          <div className="card p-4">
-            <h2 className="label-xs mb-3">可靠度颜色说明</h2>
-            <div className="space-y-2">
-              {(
-                [
-                  { range: '≥ 85%', color: '#22C55E', label: '高置信度' },
-                  { range: '70–84%', color: '#84CC16', label: '较高置信度' },
-                  { range: '50–69%', color: '#EAB308', label: '中等置信度' },
-                  { range: '35–49%', color: '#F97316', label: '偏低置信度' },
-                  { range: '< 35%', color: '#EF4444', label: '低置信度' },
-                ] as const
-              ).map((item) => (
-                <div key={item.range} className="flex items-center gap-2 text-xs">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="mono text-ink-tertiary w-16">{item.range}</span>
-                  <span className="text-ink-secondary">{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="divider mt-3 mb-3" />
-            <h2 className="label-xs mb-3">参数来源图例</h2>
-            <div className="space-y-1.5">
-              {(
-                [
-                  'direct_observation',
-                  'rule_inference',
-                  'ai_completion',
-                  'pending_review',
-                ] as const
-              ).map((s) => (
-                <SourceBadge key={s} source={s} variant="inline" />
-              ))}
-            </div>
-          </div>
-
-          <SystemEvolutionRoadmap evolution={overview.evolution} projectId={projectId} />
-
-          {/* Review items */}
+          {/* Review items — high priority first, rest fold */}
           {reviewItems.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <h2 className="section-heading">待人工复核项</h2>
                 <span className="text-xs text-review bg-review-subtle border border-review-muted px-2 py-0.5 rounded-full">
                   {reviewItems.length} 项
                 </span>
               </div>
-              <div className="space-y-3">
-                {reviewItems.map((item, i) => {
-                  const evidenceIndex = item.relatedEvidenceIds?.length
-                    ? facadeCase.evidence.findIndex((e) => e.id === item.relatedEvidenceIds[0])
-                    : -1
+              <div className="space-y-2">
+                {highPriorityReview.map((item, i) => {
+                  const evidenceIndex = item.relatedEvidenceIds?.length ? facadeCase.evidence.findIndex((e) => e.id === item.relatedEvidenceIds[0]) : -1
                   const detailSlot = evidenceIndex >= 0 && evidenceIndex < 4 ? evidenceIndex + 1 : null
                   return (
-                    <ReviewItemCard
-                      key={item.id}
-                      item={item}
-                      index={i + 1}
-                      projectId={projectId}
-                      detailSlot={detailSlot}
-                    />
+                    <ReviewItemCard key={item.id} item={item} index={i + 1} projectId={projectId} detailSlot={detailSlot} />
                   )
                 })}
+                {restReview.length > 0 && (
+                  <>
+                    {!showMoreReview ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowMoreReview(true)}
+                        className="w-full py-2 text-2xs text-ink-tertiary hover:text-ink-secondary border border-border rounded-lg"
+                      >
+                        更多复核项 ({restReview.length})
+                      </button>
+                    ) : (
+                      <>
+                        {restReview.map((item, i) => {
+                          const evidenceIndex = item.relatedEvidenceIds?.length ? facadeCase.evidence.findIndex((e) => e.id === item.relatedEvidenceIds[0]) : -1
+                          const detailSlot = evidenceIndex >= 0 && evidenceIndex < 4 ? evidenceIndex + 1 : null
+                          return (
+                            <ReviewItemCard key={item.id} item={item} index={highPriorityReview.length + i + 1} projectId={projectId} detailSlot={detailSlot} />
+                          )
+                        })}
+                        <button type="button" onClick={() => setShowMoreReview(false)} className="w-full py-1.5 text-2xs text-ink-tertiary">收起</button>
+                      </>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           )}
+
+          {/* Legend — collapsible */}
+          <div className="border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowLegend((v) => !v)}
+              className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-tertiary"
+            >
+              <span>可靠度与来源图例</span>
+              <span>{showLegend ? '收起' : '展开'}</span>
+            </button>
+            {showLegend && (
+              <div className="p-4 border-t border-border space-y-3">
+                <div className="flex flex-wrap gap-2 text-2xs">
+                  {([{ range: '≥85%', color: '#22C55E' }, { range: '70–84%', color: '#84CC16' }, { range: '50–69%', color: '#EAB308' }, { range: '<50%', color: '#EF4444' }] as const).map((item) => (
+                    <span key={item.range} className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                      {item.range}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(['direct_observation', 'rule_inference', 'ai_completion', 'pending_review'] as const).map((s) => (
+                    <SourceBadge key={s} source={s} variant="inline" />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* System evolution — bottom, collapsible */}
+          <div className="border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowEvolution((v) => !v)}
+              className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-tertiary"
+            >
+              <span>系统演进路径</span>
+              <span>{showEvolution ? '收起' : '展开'}</span>
+            </button>
+            {showEvolution && (
+              <div className="border-t border-border">
+                <SystemEvolutionRoadmap evolution={overview.evolution} projectId={projectId} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

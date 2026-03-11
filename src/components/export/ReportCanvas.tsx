@@ -79,15 +79,18 @@ export function ReportCanvas({ facadeCase, printRef }: ReportCanvasProps) {
         </section>
 
         {facadeCase.overview.recommendedUsage && (
-          <section className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center justify-between gap-4">
+          <section className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-medium">当前使用建议</p>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-xs font-semibold text-gray-900">
                   {getRecommendedUsageMeta(facadeCase.overview.recommendedUsage).label}
                 </p>
-                <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                  {facadeCase.overview.usageReason}
+                <p className="text-xs text-gray-600 mt-0.5 leading-snug">
+                  {(() => {
+                    const r = facadeCase.overview.usageReason || getRecommendedUsageMeta(facadeCase.overview.recommendedUsage).description
+                    const i = r.search(/[。.!?]/)
+                    return i >= 0 ? r.slice(0, i + 1) : r
+                  })()}
                 </p>
               </div>
               <span

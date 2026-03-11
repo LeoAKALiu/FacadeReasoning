@@ -20,6 +20,8 @@ export default function MappingPage() {
   const facadeCase = getCaseById(projectId)
 
   const [selectedMapping, setSelectedMapping] = useState<ParameterMapping | null>(null)
+  const [showMappingNote, setShowMappingNote] = useState(false)
+  const [showTranslationNote, setShowTranslationNote] = useState(false)
 
   if (!facadeCase) {
     return (
@@ -67,15 +69,11 @@ export default function MappingPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-xl font-bold text-ink-primary mb-1">有效参数 → 设计参数 映射</h1>
-          <p className="text-sm text-ink-secondary">
-            将从图像中提取的有效参数，按语义关系映射至建筑设计参数体系。
-            点击任意映射行查看完整依据链。
-          </p>
-          <p className="text-xs text-ink-tertiary mt-2">
-            这些设计参数将进一步用于标准层组织、轴网候选与结构表达生成。
+          <h1 className="text-xl font-bold text-ink-primary">有效参数 → 设计参数 映射</h1>
+          <p className="text-sm text-ink-secondary mt-1 pl-0.5 border-l-2 border-accent/50 py-0.5 px-3">
+            已形成若干可进入后续结构表达的关键设计参数。
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -88,14 +86,13 @@ export default function MappingPage() {
         </div>
       </div>
 
-      {/* Stats bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      {/* Stats — 3 only */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: '映射总数', value: String(facadeCase.parameterMappings.length) },
-          { label: '设计参数类别', value: String(Object.keys(categoryGroups).length) },
+          { label: '映射数', value: String(facadeCase.parameterMappings.length) },
           { label: '核心约束参数', value: String(criticalCount) },
           {
-            label: '平均映射置信度',
+            label: '平均映射可靠度',
             value: <ReliabilityDot value={avgConfidence} variant="pill" />,
           },
         ].map((stat) => (
@@ -132,23 +129,38 @@ export default function MappingPage() {
         ))}
       </div>
 
-      <div className="mt-6">
-        <EngineeringTranslationFlow bridgeNote="当前映射结果不会停留在参数层，下一步将继续转译为标准层组织、轴网候选与结构表达草图。" />
+      {/* Translation note — collapsible */}
+      <div className="mt-6 border border-border rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowTranslationNote((v) => !v)}
+          className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-secondary"
+        >
+          <span>参数将转译为标准层、轴网与结构表达</span>
+          <span className="text-2xs text-ink-tertiary">{showTranslationNote ? '收起' : '展开'}</span>
+        </button>
+        {showTranslationNote && (
+          <div className="p-4 border-t border-border">
+            <EngineeringTranslationFlow bridgeNote="当前映射结果将转译为标准层组织、轴网候选与结构表达草图。" />
+          </div>
+        )}
       </div>
 
-      {/* Mapping legend callout */}
-      <div className="card p-4 mt-6 flex gap-3">
-        <div className="w-8 h-8 rounded-md bg-infer-subtle border border-infer-muted flex items-center justify-center shrink-0">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7H12M8 3L12 7L8 11" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <div className="text-xs text-ink-secondary leading-relaxed">
-          <span className="text-ink-primary font-medium">映射说明</span>
-          ：左侧为从图像直接提取的「有效参数」（Observable），右侧为建筑设计参数体系中的
-          「设计参数」（Design Parameter）。置信度反映该映射在当前视觉证据下的可靠程度。
-          点击任意行可在右侧抽屉中查看支撑该映射的原始证据链。
-        </div>
+      {/* Mapping legend — collapsible */}
+      <div className="mt-4 border border-border rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowMappingNote((v) => !v)}
+          className="w-full px-4 py-2 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-xs text-ink-tertiary"
+        >
+          <span>映射说明</span>
+          <span>{showMappingNote ? '收起' : '展开'}</span>
+        </button>
+        {showMappingNote && (
+          <div className="p-4 border-t border-border text-xs text-ink-secondary leading-relaxed">
+            有效参数 → 设计参数；置信度表可靠程度。点击行可查看依据链。
+          </div>
+        )}
       </div>
 
       {/* Evidence basis drawer */}

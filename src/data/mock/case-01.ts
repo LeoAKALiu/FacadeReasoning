@@ -82,11 +82,11 @@ export const case01: FacadeCase = enrichFacadeCase({
   buildingYear: '2019',
   floors: 42,
   createdAt: '2026-03-04T09:30:00Z',
-  thumbnailUrl: '/assets/cases/case-01/facade-original.jpg',
+  thumbnailUrl: '/assets/cases/case-01/facade-original.png',
   summary:
     '全玻璃幕墙体系，单元式竖向分格，铝合金型材骨架可见，立面模数清晰，整体识别置信度高。',
   images: {
-    original: '/assets/cases/case-01/facade-original.jpg',
+    original: '/assets/cases/case-01/facade-original.png',
     evidence: '/assets/cases/case-01/facade-annotated.png',
     corrected: '/assets/cases/case-01/facade-rectified.png',
   },

@@ -20,19 +20,17 @@ export function FutureOutputPreview({
   if (!futureOutputs) return null
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div>
-        <p className="label-xs mb-1">未来成果物预览</p>
-        <h3 className="text-sm font-semibold text-ink-primary">
-          当前参数结果将进一步形成的工程表达成果
-        </h3>
+        <p className="label-xs mb-0.5">未来成果物预览</p>
+        <p className="text-xs text-ink-primary">结构草图、参数表、构件候选</p>
       </div>
 
       {projectId && (
         <FutureOutputGallery
           projectId={projectId}
           includeComponentCandidates
-          className="mb-4"
+          className="mb-3"
         />
       )}
 
@@ -41,19 +39,18 @@ export function FutureOutputPreview({
       <ComponentCandidatePreview items={futureOutputs.componentCandidates} />
 
       {futureOutputs.reviewSensitiveItems.length > 0 && (
-        <div className="rounded-lg border border-review-muted bg-review-subtle p-4">
-          <p className="text-xs font-medium text-review mb-2">关键参数优先复核建议</p>
-          <div className="flex flex-wrap gap-2">
+        <details className="rounded-lg border border-review-muted bg-review-subtle overflow-hidden group">
+          <summary className="px-3 py-2 text-2xs font-medium text-review cursor-pointer list-none">
+            关键参数优先复核 ({futureOutputs.reviewSensitiveItems.length})
+          </summary>
+          <div className="px-3 pb-2 pt-0 flex flex-wrap gap-2 border-t border-review-muted">
             {futureOutputs.reviewSensitiveItems.map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-review-muted px-2 py-0.5 text-2xs text-review"
-              >
+              <span key={item} className="rounded-full border border-review-muted px-2 py-0.5 text-2xs text-review">
                 {item}
               </span>
             ))}
           </div>
-        </div>
+        </details>
       )}
     </div>
   )

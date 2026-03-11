@@ -47,6 +47,8 @@ export default function EvidencePage() {
   const [selectedFilter, setSelectedFilter] = useState<EvidenceSource | 'all'>('all')
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [hoveredEvidenceId, setHoveredEvidenceId] = useState<string | null>(null)
+  const [showMoreEvidence, setShowMoreEvidence] = useState(false)
+  const [caseInfoOpen, setCaseInfoOpen] = useState(false)
   const highlightedEvidenceId = selectedEvidenceId ?? hoveredEvidenceId
 
   if (!facadeCase) {
@@ -75,13 +77,19 @@ export default function EvidencePage() {
 
   const pageConclusion = getPageConclusion(facadeCase.evidence)
 
+  const keyEvidenceCount = 4
+  const keyEvidence = facadeCase.evidence.slice(0, keyEvidenceCount)
+  const restEvidence = facadeCase.evidence.slice(keyEvidenceCount)
+  const displayEvidence = showMoreEvidence ? filteredEvidence : filteredEvidence.slice(0, keyEvidenceCount)
+  const hasMoreEvidence = filteredEvidence.length > keyEvidenceCount
+
   return (
     <div>
-      <div className="flex items-start justify-between gap-4 mb-4">
+      <div className="flex items-start justify-between gap-4 mb-3">
         <div>
-          <h1 className="text-xl font-bold text-ink-primary mb-1">有效参数证据提取</h1>
-          <p className="text-sm text-ink-secondary">
-            从立面图像中提取可用于推断设计参数的视觉证据，并标注区域依据和来源状态。
+          <h1 className="text-xl font-bold text-ink-primary">有效参数证据提取</h1>
+          <p className="text-sm text-ink-secondary mt-1 pl-0.5 border-l-2 border-accent/50 py-0.5 px-3">
+            {pageConclusion}
           </p>
         </div>
         <Link
@@ -92,21 +100,15 @@ export default function EvidencePage() {
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap mb-2">
-        {Object.entries(sourceCounts).map(([source, count]) => (
+      <div className="flex items-center gap-3 flex-wrap mb-4 text-xs text-ink-tertiary">
+        <span className="mono font-medium text-ink-secondary">{facadeCase.evidence.length} 条证据</span>
+        {Object.entries(sourceCounts).slice(0, 3).map(([source, count]) => (
           <div key={source} className="flex items-center gap-1">
             <SourceBadge source={source as EvidenceSource} variant="inline" />
-            <span className="text-xs text-ink-tertiary">× {count}</span>
+            <span>{count}</span>
           </div>
         ))}
-        <span className="ml-auto text-xs text-ink-tertiary">
-          共 {facadeCase.evidence.length} 条证据
-        </span>
       </div>
-
-      <p className="text-sm text-ink-secondary mb-6 pl-0.5 border-l-2 border-accent/50 py-1 px-3">
-        {pageConclusion}
-      </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
@@ -127,35 +129,6 @@ export default function EvidencePage() {
             onSlotHover={setHoveredEvidenceId}
             className="mt-4"
           />
-
-          {/* Case info card */}
-          <div className="card p-4 mt-4 space-y-2">
-            <p className="label-xs">案例信息</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <span className="text-ink-tertiary">建筑类型</span>
-                <p className="text-ink-primary mt-0.5">{facadeCase.buildingType}</p>
-              </div>
-              <div>
-                <span className="text-ink-tertiary">位置</span>
-                <p className="text-ink-primary mt-0.5">{facadeCase.location}</p>
-              </div>
-              {facadeCase.buildingYear && (
-                <div>
-                  <span className="text-ink-tertiary">建造年份</span>
-                  <p className="text-ink-primary mt-0.5">{facadeCase.buildingYear}</p>
-                </div>
-              )}
-              {facadeCase.floors && (
-                <div>
-                  <span className="text-ink-tertiary">楼层数</span>
-                  <p className="text-ink-primary mt-0.5">{facadeCase.floors} 层</p>
-                </div>
-              )}
-            </div>
-            <div className="divider" />
-            <p className="text-xs text-ink-secondary leading-relaxed">{facadeCase.summary}</p>
-          </div>
         </div>
 
         {/* Right: Evidence list */}
@@ -185,9 +158,9 @@ export default function EvidencePage() {
             })}
           </div>
 
-          {/* Cards */}
-          <div className="space-y-3 overflow-y-auto max-h-[700px] pr-1">
-            {filteredEvidence.map((ev) => (
+          {/* Key evidence (default 4) + more fold */}
+          <div className="space-y-3">
+            {displayEvidence.map((ev) => (
               <EvidenceCard
                 key={ev.id}
                 evidence={ev}
@@ -198,8 +171,40 @@ export default function EvidencePage() {
                 onHover={setHoveredEvidenceId}
               />
             ))}
+            {hasMoreEvidence && (
+              <button
+                type="button"
+                onClick={() => setShowMoreEvidence((v) => !v)}
+                className="w-full py-2 text-xs text-ink-tertiary hover:text-ink-secondary border border-border rounded-lg hover:bg-surface-raised transition-colors"
+              >
+                {showMoreEvidence ? '收起' : `更多证据 (${filteredEvidence.length - keyEvidenceCount})`}
+              </button>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* Case info — collapsible */}
+      <div className="mt-6 border border-border rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setCaseInfoOpen((o) => !o)}
+          className="w-full px-4 py-2.5 flex items-center justify-between text-left bg-surface-raised/50 hover:bg-surface-raised text-sm"
+        >
+          <span className="text-ink-secondary font-medium">案例信息</span>
+          <span className="text-2xs text-ink-tertiary">{caseInfoOpen ? '收起' : '展开'}</span>
+        </button>
+        {caseInfoOpen && (
+          <div className="p-4 space-y-2 border-t border-border">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div><span className="text-ink-tertiary">建筑类型</span><p className="text-ink-primary mt-0.5">{facadeCase.buildingType}</p></div>
+              <div><span className="text-ink-tertiary">位置</span><p className="text-ink-primary mt-0.5">{facadeCase.location}</p></div>
+              {facadeCase.buildingYear && <div><span className="text-ink-tertiary">建造年份</span><p className="text-ink-primary mt-0.5">{facadeCase.buildingYear}</p></div>}
+              {facadeCase.floors && <div><span className="text-ink-tertiary">楼层数</span><p className="text-ink-primary mt-0.5">{facadeCase.floors} 层</p></div>}
+            </div>
+            <p className="text-xs text-ink-tertiary leading-relaxed pt-1">{facadeCase.summary}</p>
+          </div>
+        )}
       </div>
     </div>
   )
